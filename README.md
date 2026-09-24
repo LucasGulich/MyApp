@@ -4,25 +4,6 @@
 > **lembretes, notas com senhas, Kanban e recados**, num aplicativo só,
 > com senha mestra e criptografia.
 
-Nasceu para substituir o `Lembrete.bat` — um menu em lote que criava lembretes
-no Agendador de Tarefas do Windows — e cresceu módulo a módulo.
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│  ⚡ MyApp        Lembretes                 ┌──────────────────────┐ │
-│                 2 ativos de 3             │ ✓ Lembrete criado    │ │
-│  ▌⌂ Início                                └──────────────────────┘ │
-│   🔔 Lembretes   [ Buscar por título...  ✕ ] [Todos ▾] [Minha ordem ▾]│
-│   ▦ Kanban      ┌──────────────────────────────────────────────┐  │
-│   ▤ Notas       │ ▍Reunião de alinhamento                 hoje │  │
-│                 │  Em 25 min  (14:00)                          │  │
-│                 │  Dias úteis • avisa 5 min antes    ⏸ ✎ ⧉ 🗑 │  │
-│                 └──────────────────────────────────────────────┘  │
-│   ⚙ Configurações                                                 │
-│   🔒 Trancar                                                      │
-└──────────────────────────────────────────────────────────────────┘
-```
-
 **Versão atual:** 1.9.0 · **Plataforma:** Windows 10 e 11
 
 ---
