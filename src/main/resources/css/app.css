@@ -1,0 +1,1580 @@
+/* =========================================================================
+   MyApp — folha de estilo
+   -------------------------------------------------------------------------
+   Toda a aparência do aplicativo está aqui. As cores são declaradas uma vez
+   em .raiz e reutilizadas por nome: para mudar o tema inteiro basta reescrever
+   aquele bloco, sem tocar em mais nada.
+
+   O desenho segue quatro regras:
+
+     1. SUPERFÍCIES EM CAMADAS — fundo, painel, superfície, elevado. A
+        profundidade vem da diferença de tom, não de bordas grossas.
+     2. UM ACENTO SÓ — o azul é reservado ao que está ativo ou pede ação.
+        Usado com parcimônia, ele chama atenção quando aparece.
+     3. RESPIRO — o que separa interface amadora de profissional costuma ser
+        espaço vazio, não enfeite.
+     4. UM RAIO DE CANTO POR PAPEL — 8 para controles, 12 para cartões,
+        16 para janelas. Misturar raios é o que faz uma tela parecer colcha
+        de retalhos.
+
+   Índice
+     · tokens de cor .............. tema escuro, tema claro
+     · tipografia
+     · ícones
+     · janela e barra de título
+     · menu lateral
+     · cartões
+     · botões
+     · campos
+     · avisos (retorno de ação)
+     · diálogos
+     · listas e rolagem
+     · tela de senha
+     · formulários em seções
+     · módulo notas
+     · código
+     · tela inicial e recados
+     · arrastar e soltar
+     · controles compostos do JavaFX
+   ========================================================================= */
+
+/* ======================================================= TEMA ESCURO ==== */
+
+.raiz {
+    /* superfícies, do fundo para a frente */
+    -cor-fundo:            #0D1117;
+    -cor-painel:           #141A22;
+    -cor-superficie:       #191F29;
+    -cor-superficie-alta:  #212936;
+    -cor-superficie-topo:  #2B3441;
+
+    /* traços */
+    -cor-borda:            #242C38;
+    -cor-borda-forte:      #354152;
+
+    /* texto */
+    -cor-texto:            #E9EDF3;
+    -cor-texto-medio:      #A6B2C3;
+    -cor-texto-fraco:      #6D7A8C;
+
+    /* acento e estados */
+    -cor-primaria:         #4A8CFF;
+    -cor-primaria-clara:   #7EAEFF;
+    -cor-primaria-fundo:   #16253D;
+    -cor-perigo:           #FF5F6D;
+    -cor-perigo-clara:     #FF8A94;
+    -cor-perigo-fundo:     #341A1F;
+    -cor-sucesso:          #3DD68C;
+    -cor-sucesso-fundo:    #10291F;
+    -cor-atencao:          #F5B547;
+    -cor-atencao-fundo:    #2F2514;
+
+    -cor-sombra:           rgba(0, 0, 0, 0.55);
+    -cor-brilho-primaria:  rgba(74, 140, 255, 0.30);
+
+    -fx-background-color: -cor-fundo;
+    -fx-font-family: "Segoe UI Variable Text", "Segoe UI", "Inter", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* ======================================================== TEMA CLARO ==== */
+
+/* Não é o tema escuro invertido: no claro a profundidade vem do branco para
+   frente e do cinza para trás, e as sombras precisam ser bem mais discretas,
+   senão a tela fica suja. */
+
+.raiz.claro {
+    -cor-fundo:            #F2F5F9;
+    -cor-painel:           #FFFFFF;
+    -cor-superficie:       #FFFFFF;
+    -cor-superficie-alta:  #F0F3F8;
+    -cor-superficie-topo:  #E4E9F2;
+
+    -cor-borda:            #E2E7EF;
+    -cor-borda-forte:      #C7D0DE;
+
+    -cor-texto:            #121821;
+    -cor-texto-medio:      #4A5667;
+    -cor-texto-fraco:      #7B8698;
+
+    -cor-primaria:         #2E6FE8;
+    -cor-primaria-clara:   #1B54C0;
+    -cor-primaria-fundo:   #E4EDFF;
+    -cor-perigo:           #D83A48;
+    -cor-perigo-clara:     #B22A36;
+    -cor-perigo-fundo:     #FDE9EB;
+    -cor-sucesso:          #11865E;
+    -cor-sucesso-fundo:    #E0F6EE;
+    -cor-atencao:          #A9700A;
+    -cor-atencao-fundo:    #FCF2DC;
+
+    -cor-sombra:           rgba(26, 38, 58, 0.10);
+    -cor-brilho-primaria:  rgba(46, 111, 232, 0.22);
+}
+
+/* ======================================================= TIPOGRAFIA ===== */
+
+Label { -fx-text-fill: -cor-texto; }
+
+.texto        { -fx-fill: -cor-texto; -fx-text-fill: -cor-texto; }
+.texto-fraco  { -fx-text-fill: -cor-texto-fraco; -fx-font-size: 12px; }
+.texto-perigo { -fx-text-fill: -cor-perigo; }
+.texto-ok     { -fx-text-fill: -cor-sucesso; }
+.texto-alerta { -fx-text-fill: -cor-atencao; }
+
+.titulo-tela {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.subtitulo {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 12.5px;
+}
+
+/* Rótulo de grupo: miúdo, espaçado e em caixa alta, para separar sem gritar. */
+.rotulo {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+}
+
+/* =========================================================== ÍCONES ===== */
+
+/* Os ícones são traçados vetoriais (ver Icone.java). A cor vem daqui, o que
+   os faz acompanhar o tema, o item ativo e o estado do botão — coisa que
+   emoji nenhum consegue fazer. */
+
+.icone-forma {
+    -fx-fill: transparent;
+    -fx-stroke: -cor-texto-medio;
+    -fx-stroke-width: 2;
+}
+
+/* Os poucos desenhos que só fazem sentido cheios: ponto, estrela marcada. */
+.icone-cheio {
+    -fx-fill: -cor-texto-medio;
+    -fx-stroke: transparent;
+}
+
+.icone-primario .icone-forma { -fx-stroke: -cor-primaria; }
+.icone-primario .icone-cheio { -fx-fill: -cor-primaria; -fx-stroke: transparent; }
+.icone-perigo   .icone-forma { -fx-stroke: -cor-perigo; }
+.icone-perigo   .icone-cheio { -fx-fill: -cor-perigo; -fx-stroke: transparent; }
+.icone-sucesso  .icone-forma { -fx-stroke: -cor-sucesso; }
+.icone-atencao  .icone-forma { -fx-stroke: -cor-atencao; }
+.icone-atencao  .icone-cheio { -fx-fill: -cor-atencao; -fx-stroke: transparent; }
+.icone-fraco    .icone-forma { -fx-stroke: -cor-texto-fraco; }
+.icone-fraco    .icone-cheio { -fx-fill: -cor-texto-fraco; -fx-stroke: transparent; }
+.icone-forte    .icone-forma { -fx-stroke: -cor-texto; }
+.icone-claro    .icone-forma { -fx-stroke: white; }
+.icone-claro    .icone-cheio { -fx-fill: white; -fx-stroke: transparent; }
+
+/* Traço mais fino quando o ícone é grande: espessura 2 em 24 px é elegante,
+   em 48 px vira borracha. */
+.icone-grande .icone-forma { -fx-stroke-width: 1.6; }
+
+/* ========================================================== JANELA ====== */
+
+/* A moldura da janela. Não declara as cores do tema: quem faz isso é a pilha
+   acima dela, para que os avisos — que são irmãos deste nó, e não filhos —
+   fiquem dentro do alcance da declaração. */
+.janela-principal {
+    -fx-background-color: -cor-fundo;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-width: 1;
+}
+
+.barra-titulo {
+    -fx-background-color: -cor-painel;
+    -fx-padding: 0 0 0 14;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-border-color: transparent transparent -cor-borda transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.barra-titulo-texto {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.botao-janela {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-min-width: 46;
+    -fx-pref-width: 46;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-padding: 0;
+    -fx-cursor: default;
+}
+
+.botao-janela .icone-forma { -fx-stroke: -cor-texto-fraco; -fx-stroke-width: 1.8; }
+.botao-janela:hover { -fx-background-color: -cor-superficie-alta; }
+.botao-janela:hover .icone-forma { -fx-stroke: -cor-texto; }
+
+.botao-janela-fechar:hover { -fx-background-color: #E8112D; }
+.botao-janela-fechar:hover .icone-forma { -fx-stroke: white; }
+
+/* ===================================================== MENU LATERAL ===== */
+
+.menu-lateral {
+    -fx-background-color: -cor-painel;
+    -fx-border-color: transparent -cor-borda transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 18 12 16 12;
+    -fx-spacing: 2;
+    -fx-min-width: 228;
+    -fx-pref-width: 228;
+}
+
+/* Sem espaçamento vertical: o rótulo divide a linha com o botão de recolher,
+   e qualquer folga só embaixo faz o texto subir dentro da própria caixa —
+   fica alinhado por fora e torto por dentro. O respiro abaixo da marca é da
+   linha inteira, em .linha-marca. O recuo à esquerda é 16 para casar com o
+   dos itens do menu, que têm 13 de espaçamento mais 3 da barrinha. */
+.marca {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 4 0 16;
+    -fx-graphic-text-gap: 10;
+}
+
+.marca .icone-forma { -fx-stroke: -cor-primaria; -fx-stroke-width: 2.2; }
+
+.linha-marca { -fx-padding: 2 2 16 0; }
+
+/* ---- barra recolhida ---------------------------------------------------- */
+
+/* Recolhida, a barra devolve quase 170 px ao conteúdo — o que resolve as telas
+   de tres colunas com a janela sem maximizar. A largura tem que caber o botao
+   de 40 px mais o respiro dos dois lados, e nada alem disso. */
+
+/* 63, e não 62: a barra tem 1 px de borda à direita, e com largura par sobrava
+   uma largura útil ímpar — o ícone caía em meio pixel e ficava 1 px fora do
+   centro do quadrado azul. 63 - 1 de borda - 10 de cada lado = 42, que divide
+   certinho em torno dos 18 px do ícone. */
+.menu-lateral.recolhido {
+    -fx-min-width: 63;
+    -fx-pref-width: 63;
+    -fx-padding: 18 10 16 10;
+}
+
+/* O alinhamento precisa vir daqui, e não de um setAlignment no Java: o
+   `-fx-alignment: center-left` da regra base venceria a chamada do código, e
+   o ícone ficava colado na borda esquerda do quadrado azul. */
+.menu-lateral.recolhido .item-menu {
+    -fx-padding: 11 0 11 0;
+    -fx-border-width: 0;
+    -fx-background-radius: 10;
+    -fx-alignment: center;
+    -fx-graphic-text-gap: 0;
+}
+
+/* Sem o texto, a barrinha lateral do item ativo nao tem onde caber: o fundo
+   cheio passa a ser o unico sinal de "voce esta aqui". */
+.menu-lateral.recolhido .item-menu.ativo {
+    -fx-background-color: -cor-primaria;
+}
+
+.menu-lateral.recolhido .item-menu.ativo .icone-forma { -fx-stroke: white; }
+
+.botao-recolher {
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-width: 30;
+    -fx-pref-height: 30;
+    -fx-opacity: 0.5;
+}
+
+.botao-recolher:hover { -fx-opacity: 1; }
+
+/* O item ativo ganha uma barrinha à esquerda e fundo suave. A barra é o que
+   deixa claro "você está aqui" sem depender só da cor — funciona também para
+   quem não distingue bem azul de cinza. */
+.item-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 13px;
+    -fx-padding: 11 14 11 13;
+    -fx-background-radius: 9;
+    -fx-alignment: center-left;
+    -fx-graphic-text-gap: 12;
+    -fx-cursor: hand;
+    -fx-max-width: infinity;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 3;
+    -fx-border-radius: 0;
+}
+
+.item-menu:hover {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto;
+}
+
+.item-menu:hover .icone-forma { -fx-stroke: -cor-texto; }
+
+/* A ordem das bordas no JavaFX é topo, direita, baixo, esquerda — nas duas
+   propriedades. A cor precisa ficar no MESMO lado em que há largura, senão a
+   barrinha é pintada numa aresta de espessura zero e não aparece nunca. */
+.item-menu.ativo {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent transparent transparent -cor-primaria;
+}
+
+.item-menu.ativo .icone-forma { -fx-stroke: -cor-primaria-clara; -fx-stroke-width: 2.2; }
+
+/* Trancado: o menu apaga inteiro, o que explica sozinho por que parou de
+   responder. Sem isso o clique morto parece defeito. */
+.menu-lateral.trancado { -fx-opacity: 0.28; }
+.item-menu:disabled    { -fx-opacity: 1; }
+
+/* ====================================================== ÁREA CENTRAL ==== */
+
+.conteudo {
+    -fx-background-color: -cor-fundo;
+    -fx-padding: 24 30 24 30;
+}
+
+.separador {
+    -fx-background-color: -cor-borda;
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+}
+
+/* ========================================================== CARTÕES ===== */
+
+.cartao-lembrete, .cartao-nota {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 12;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 5, 0, 0, 1);
+}
+
+.cartao-lembrete { -fx-padding: 15 18 15 15; -fx-spacing: 5; }
+
+/* O cartão sobe um pouco ao passar o mouse. É a dica de que ele é clicável,
+   e custa menos atenção do que uma borda piscando. */
+.cartao-lembrete:hover, .cartao-nota:hover {
+    -fx-border-color: -cor-borda-forte;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 14, 0, 0, 4);
+}
+
+.cartao-lembrete.inativo, .cartao-nota.inativo { -fx-opacity: 0.42; }
+
+/* Faixa colorida na lateral: identifica o assunto de relance. */
+.faixa-cor {
+    -fx-background-radius: 3;
+    -fx-min-width: 4;
+    -fx-pref-width: 4;
+}
+
+/* =========================================================== BOTÕES ===== */
+
+.botao {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-width: 1;
+    -fx-padding: 10 18 10 18;
+    -fx-graphic-text-gap: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+}
+
+.botao:hover {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-border-color: -cor-primaria;
+}
+
+.botao:hover .icone-forma { -fx-stroke: -cor-primaria; }
+.botao:pressed  { -fx-background-color: -cor-borda-forte; }
+.botao:disabled { -fx-opacity: 0.4; }
+
+/* O primário tem um degradê de dois passos e um brilho abaixo: dá volume sem
+   virar botão de vidro dos anos 2000. */
+.botao-primario {
+    -fx-background-color: linear-gradient(to bottom, -cor-primaria-clara, -cor-primaria);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 9;
+    -fx-border-width: 0;
+    -fx-padding: 10 20 10 20;
+    -fx-graphic-text-gap: 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, -cor-brilho-primaria, 10, 0, 0, 2);
+}
+
+.botao-primario .icone-forma { -fx-stroke: white; }
+.botao-primario .icone-cheio { -fx-fill: white; -fx-stroke: transparent; }
+
+.botao-primario:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-cor-primaria-clara, 12%), -cor-primaria-clara);
+    -fx-effect: dropshadow(gaussian, -cor-brilho-primaria, 16, 0, 0, 4);
+}
+
+.botao-primario:pressed  { -fx-background-color: -cor-primaria; -fx-effect: none; }
+.botao-primario:disabled { -fx-opacity: 0.4; -fx-effect: none; }
+
+/* Perigo vazado: vermelho só na borda, para não gritar antes da hora. */
+.botao-perigo {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cor-perigo;
+    -fx-border-color: -cor-perigo;
+    -fx-border-width: 1;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-padding: 10 18 10 18;
+    -fx-graphic-text-gap: 8;
+    -fx-cursor: hand;
+}
+
+.botao-perigo .icone-forma { -fx-stroke: -cor-perigo; }
+.botao-perigo:hover { -fx-background-color: -cor-perigo; -fx-text-fill: white; }
+.botao-perigo:hover .icone-forma { -fx-stroke: white; }
+
+/* Perigo cheio: só no botão que confirma a exclusão, onde o vermelho é
+   exatamente o aviso que se quer dar. */
+.botao-perigo-cheio {
+    -fx-background-color: -cor-perigo;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 9;
+    -fx-border-width: 0;
+    -fx-padding: 10 20 10 20;
+    -fx-graphic-text-gap: 8;
+    -fx-cursor: hand;
+}
+
+.botao-perigo-cheio .icone-forma { -fx-stroke: white; }
+.botao-perigo-cheio:hover { -fx-background-color: derive(-cor-perigo, -12%); }
+
+/* Botão só com ícone. 40 px de área clicável: acima do mínimo confortável,
+   porque estes são os botões mais usados da tela de lembretes. */
+.botao-icone {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+}
+
+.botao-icone:hover {
+    -fx-background-color: -cor-primaria;
+    -fx-border-color: -cor-primaria;
+}
+
+.botao-icone:hover .icone-forma { -fx-stroke: white; }
+
+/* Botão de ícone que liga e desliga (fixar): ligado, fica azul mesmo sem o
+   mouse em cima, para o estado se ler de longe. */
+.botao-icone.ligado {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-border-color: -cor-primaria;
+}
+
+.botao-icone.ligado .icone-forma { -fx-stroke: -cor-primaria-clara; }
+.botao-icone.ligado:hover { -fx-background-color: -cor-primaria; }
+.botao-icone.ligado:hover .icone-forma { -fx-stroke: white; }
+.botao-icone:hover .icone-cheio { -fx-fill: white; -fx-stroke: transparent; }
+.botao-icone:pressed  { -fx-background-color: -cor-primaria-clara; }
+.botao-icone:disabled { -fx-opacity: 0.35; }
+
+.botao-icone-perigo:hover {
+    -fx-background-color: -cor-perigo;
+    -fx-border-color: -cor-perigo;
+}
+
+.botao-olho {
+    -fx-min-width: 46;
+    -fx-pref-width: 46;
+    -fx-min-height: 46;
+    -fx-pref-height: 46;
+}
+
+/* Parece um link: ação secundária dentro de um bloco de texto. */
+.botao-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-border-width: 0;
+    -fx-padding: 3 2 3 2;
+    -fx-graphic-text-gap: 6;
+    -fx-cursor: hand;
+    -fx-font-size: 11.5px;
+    -fx-underline: true;
+}
+
+/* Botão baixo do cabeçalho de uma seção (Botoes.miudo): da altura do título,
+   com fundo só sob o mouse. */
+.botao-miudo {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cor-texto-medio;
+    -fx-background-radius: 7;
+    -fx-border-width: 0;
+    -fx-padding: 4 9 4 8;
+    -fx-graphic-text-gap: 6;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+
+.botao-miudo .icone-forma { -fx-stroke: -cor-texto-medio; }
+.botao-miudo:hover { -fx-background-color: -cor-superficie-alta; -fx-text-fill: -cor-texto; }
+.botao-miudo:hover .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+.botao-link .icone-forma { -fx-stroke: -cor-primaria-clara; }
+.botao-link:hover { -fx-text-fill: -cor-primaria; }
+
+/* =========================================================== CAMPOS ===== */
+
+.campo {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto;
+    -fx-prompt-text-fill: -cor-texto-fraco;
+    -fx-background-radius: 9;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 9;
+    -fx-border-width: 1;
+    -fx-padding: 10 13 10 13;
+    -fx-font-size: 13px;
+    -fx-highlight-fill: -cor-primaria;
+    -fx-highlight-text-fill: white;
+}
+
+/* O anel de foco vem da sombra, não de uma borda mais grossa: assim o campo
+   não muda de tamanho quando recebe o cursor, e a linha não "pula". */
+.campo:focused {
+    -fx-border-color: -cor-primaria;
+    -fx-effect: dropshadow(gaussian, -cor-brilho-primaria, 7, 0, 0, 0);
+}
+
+.campo-grande { -fx-font-size: 15px; -fx-padding: 13 15 13 15; }
+
+/* O TextArea não é um campo, é uma caixa com um painel de rolagem dentro, e
+   cada peça pinta o seu próprio fundo. O fundo interno é um retângulo de
+   canto reto: ele cobria os cantos arredondados do campo por dentro, e o
+   resultado era um contorno de foco redondo por fora e quadrado por dentro —
+   o "cantinho sem o contorno azul".
+
+   A correção é deixar as peças de dentro transparentes e pintar uma vez só,
+   no campo, como acontece em qualquer TextField. */
+.text-area.campo { -fx-padding: 0; }
+.text-area > .scroll-pane { -fx-background-color: transparent; }
+.text-area > .scroll-pane > .viewport { -fx-background-color: transparent; }
+.text-area .content { -fx-background-color: transparent; -fx-padding: 10 13 10 13; }
+.text-area:focused .content { -fx-background-color: transparent; }
+
+.combo-box.campo, .date-picker.campo, .spinner.campo { -fx-padding: 3 6 3 6; }
+
+/* Campo de busca (ui.CampoBusca). O respiro da direita é o lugar do X: sem
+   ele, um texto comprido passaria por baixo do botão. */
+.campo-busca > .campo { -fx-padding: 10 36 10 13; }
+
+.botao-limpar-busca {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-min-width: 24;
+    -fx-min-height: 24;
+    -fx-pref-width: 24;
+    -fx-pref-height: 24;
+    -fx-cursor: hand;
+}
+
+.botao-limpar-busca .icone-forma { -fx-stroke: -cor-texto-fraco; }
+.botao-limpar-busca:hover { -fx-background-color: -cor-superficie-topo; }
+.botao-limpar-busca:hover .icone-forma { -fx-stroke: -cor-texto; }
+
+/* Chip que liga e desliga: dias da semana, avisos, cores. */
+.chip-dia {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto-medio;
+    -fx-background-radius: 20;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+
+.chip-dia:hover { -fx-border-color: -cor-primaria; -fx-text-fill: -cor-texto; }
+
+.chip-dia:selected {
+    -fx-background-color: -cor-primaria;
+    -fx-text-fill: white;
+    -fx-border-color: -cor-primaria;
+    -fx-font-weight: bold;
+    -fx-background-insets: 0;
+    -fx-effect: none;
+}
+
+.chip-dia:selected:focused { -fx-background-insets: 0; -fx-effect: none; }
+
+.chip-icone {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-pref-width: 44;
+    -fx-pref-height: 44;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-alignment: center;
+}
+
+.chip-icone:hover { -fx-border-color: -cor-primaria; }
+
+.chip-icone:selected {
+    -fx-background-color: -cor-primaria;
+    -fx-border-color: -cor-primaria;
+    -fx-background-insets: 0;
+}
+
+.chip-icone:selected .icone-forma { -fx-stroke: white; }
+.chip-icone:selected .icone-cheio { -fx-fill: white; -fx-stroke: transparent; }
+
+/* ======================================================== ETIQUETAS ===== */
+
+.etiqueta {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-text-fill: -cor-texto-medio;
+    -fx-background-radius: 20;
+    -fx-padding: 4 11 4 11;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-graphic-text-gap: 5;
+}
+
+.etiqueta .icone-forma { -fx-stroke-width: 2.4; }
+
+.etiqueta-protegido {
+    -fx-background-color: -cor-atencao-fundo;
+    -fx-text-fill: -cor-atencao;
+}
+
+.etiqueta-protegido .icone-forma { -fx-stroke: -cor-atencao; }
+
+.etiqueta-hoje {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-text-fill: -cor-primaria-clara;
+}
+
+.etiqueta-hoje .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+/* ============================================ AVISOS (retorno de ação) === */
+
+/* O cartãozinho que aparece no canto depois de salvar, editar ou excluir.
+   Ver Aviso.java. A camada inteira é transparente ao mouse; só o cartão
+   responde, para não bloquear a tela por trás. */
+
+/* A classe .pilha-avisos existe de propósito SEM regra de fundo. No JavaFX um
+   preenchimento transparente ainda é um preenchimento e captura o clique como
+   qualquer outro — dar "-fx-background-color: transparent" a esta camada, que
+   fica sobre a janela inteira, deixa o aplicativo todo inerte ao mouse. */
+
+.aviso {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-background-radius: 11;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 11;
+    -fx-border-width: 1;
+    -fx-padding: 0 18 0 0;
+    -fx-min-height: 52;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 22, 0, 0, 7);
+}
+
+.aviso-texto {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* A faixa colorida na lateral diz o tipo antes de o texto ser lido. */
+.aviso-faixa {
+    -fx-min-width: 4;
+    -fx-pref-width: 4;
+    -fx-background-radius: 11 0 0 11;
+}
+
+.aviso-sucesso .aviso-faixa { -fx-background-color: -cor-sucesso; }
+.aviso-sucesso .icone-forma { -fx-stroke: -cor-sucesso; }
+
+.aviso-erro .aviso-faixa    { -fx-background-color: -cor-perigo; }
+.aviso-erro .icone-forma    { -fx-stroke: -cor-perigo; }
+
+.aviso-atencao .aviso-faixa { -fx-background-color: -cor-atencao; }
+.aviso-atencao .icone-forma { -fx-stroke: -cor-atencao; }
+
+.aviso-info .aviso-faixa    { -fx-background-color: -cor-primaria; }
+.aviso-info .icone-forma    { -fx-stroke: -cor-primaria; }
+
+/* ========================================================= DIÁLOGOS ===== */
+
+/* A caixa de confirmar/avisar montada em Dialogos.java. */
+
+.caixa-dialogo {
+    -fx-background-color: -cor-fundo;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 30, 0, 0, 10);
+}
+
+.dialogo-corpo   { -fx-padding: 22 26 6 22; }
+.dialogo-acoes   { -fx-padding: 16 22 20 22; }
+
+.dialogo-titulo {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.dialogo-mensagem {
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 13px;
+    -fx-max-width: 380;
+}
+
+/* O selo redondo com o ícone: é ele que dá o tom da mensagem antes da
+   leitura — vermelho para de fato parar o dedo, azul para só informar. */
+.dialogo-selo {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-pref-width: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+    -fx-background-radius: 22;
+    -fx-background-color: -cor-superficie-alta;
+}
+
+.dialogo-perigo  .dialogo-selo { -fx-background-color: -cor-perigo-fundo; }
+.dialogo-perigo  .icone-selo .icone-forma { -fx-stroke: -cor-perigo; }
+
+.dialogo-sucesso .dialogo-selo { -fx-background-color: -cor-sucesso-fundo; }
+.dialogo-sucesso .icone-selo .icone-forma { -fx-stroke: -cor-sucesso; }
+
+.dialogo-atencao .dialogo-selo { -fx-background-color: -cor-atencao-fundo; }
+.dialogo-atencao .icone-selo .icone-forma { -fx-stroke: -cor-atencao; }
+
+.dialogo-info    .dialogo-selo { -fx-background-color: -cor-primaria-fundo; }
+.dialogo-info    .icone-selo .icone-forma { -fx-stroke: -cor-primaria; }
+
+.dialogo-pergunta .dialogo-selo { -fx-background-color: -cor-primaria-fundo; }
+.dialogo-pergunta .icone-selo .icone-forma { -fx-stroke: -cor-primaria; }
+
+/* ============================================== LISTAS E ROLAGEM ======== */
+
+.scroll-pane, .scroll-pane .viewport { -fx-background-color: transparent; }
+.scroll-pane { -fx-background-insets: 0; -fx-padding: 0; }
+.scroll-bar:vertical, .scroll-bar:horizontal { -fx-background-color: transparent; }
+
+.scroll-bar .thumb {
+    -fx-background-color: -cor-borda-forte;
+    -fx-background-radius: 8;
+    -fx-background-insets: 3;
+}
+
+.scroll-bar .thumb:hover { -fx-background-color: -cor-texto-fraco; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-opacity: 0; -fx-padding: 0; }
+.scroll-bar:vertical   { -fx-pref-width: 12; }
+.scroll-bar:horizontal { -fx-pref-height: 12; }
+
+/* ==================================================== TELA DE SENHA ===== */
+
+.tela-bloqueio {
+    -fx-background-color: -cor-fundo;
+    -fx-alignment: center;
+    -fx-spacing: 18;
+    -fx-padding: 40;
+}
+
+/* O cadeado grande é a única coisa na tela; com traço fino ele fica elegante
+   em vez de pesado. */
+.cadeado .icone-forma { -fx-stroke: -cor-primaria; -fx-stroke-width: 1.4; }
+
+/* Medidor de força: quatro blocos que vão acendendo. Uma barra contínua não
+   diz onde é "suficiente"; quatro degraus, sim. */
+.segmento-forca {
+    -fx-min-height: 6;
+    -fx-pref-height: 6;
+    -fx-max-height: 6;
+    -fx-background-radius: 3;
+    -fx-background-color: -cor-superficie-topo;
+}
+
+.segmento-forca.fraca { -fx-background-color: -cor-perigo; }
+.segmento-forca.media { -fx-background-color: -cor-atencao; }
+.segmento-forca.forte { -fx-background-color: -cor-sucesso; }
+
+/* ================================================= ALERTA DE LEMBRETE === */
+
+.popup-alerta {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 16;
+    -fx-border-color: -cor-primaria;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-padding: 20 22 20 22;
+    -fx-spacing: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 30, 0, 0, 8);
+}
+
+.popup-alerta .titulo-alerta {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+.popup-alerta .quando-alerta {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* ====================================================== ESTADO VAZIO ==== */
+
+/* Estado vazio (ui.EstadoVazio): selo, título, explicação e ação, sempre
+   nesta ordem e com estes respiros. O espaçamento entre as peças vem das
+   margens do Java, e não de -fx-spacing, porque não é uniforme: o título
+   fica colado à explicação e longe do selo e do botão. */
+.estado-vazio {
+    -fx-alignment: center;
+    -fx-padding: 44 24 44 24;
+}
+
+.estado-vazio-selo {
+    -fx-min-width: 64;
+    -fx-min-height: 64;
+    -fx-max-width: 64;
+    -fx-max-height: 64;
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-background-radius: 32;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 32;
+    -fx-border-width: 1;
+}
+
+.estado-vazio-selo .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+.estado-vazio-titulo {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.estado-vazio-explicacao {
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 12.5px;
+    -fx-line-spacing: 2;
+}
+
+.icone-vazio { -fx-opacity: 0.3; }
+.icone-vazio .icone-forma { -fx-stroke-width: 1.3; }
+
+.tooltip {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-text-fill: -cor-texto;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 12px;
+    -fx-padding: 8 12 8 12;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 12, 0, 0, 3);
+}
+
+/* ======================================== FORMULÁRIOS EM SEÇÕES ========= */
+
+/* Um formulário longo em coluna única vira uma parede de campos. Agrupado em
+   blocos com título, a mesma quantidade de campos é lida como uma sequência
+   de tópicos. Ver Secao.java. */
+
+.formulario { -fx-padding: 8 20 20 8; -fx-background-color: transparent; }
+.rolagem-formulario, .rolagem-formulario > .viewport { -fx-background-color: transparent; }
+
+.secao {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 14;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 18 20 20 20;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 5, 0, 0, 1);
+}
+
+.secao-titulo {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+    -fx-graphic-text-gap: 9;
+}
+
+.secao-titulo .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+.secao-linha {
+    -fx-background-color: -cor-borda;
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+.secao-explicacao { -fx-text-fill: -cor-texto-fraco; -fx-font-size: 12px; }
+.secao-conteudo   { -fx-spacing: 11; }
+
+.secao-campo {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.secao-dica { -fx-text-fill: -cor-texto-fraco; -fx-font-size: 11.5px; }
+
+/* ===================================================== MÓDULO NOTAS ===== */
+
+/* As três colunas encolhem antes de cortar qualquer coisa. Os mínimos são o
+   ponto em que o conteúdo ainda se lê; abaixo disso a coluna de categorias
+   sai de cena (ver NotasView.ajustarAoEspaco), em vez de a tela transbordar
+   para fora da janela. */
+
+.coluna-categorias {
+    -fx-min-width: 180;
+    -fx-pref-width: 240;
+    -fx-padding: 0 18 0 0;
+    -fx-border-color: transparent -cor-borda transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.item-categoria {
+    -fx-padding: 9 12 9 10;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.item-categoria:hover { -fx-background-color: -cor-superficie-alta; }
+.item-categoria.ativo { -fx-background-color: -cor-primaria-fundo; }
+
+.item-categoria.ativo .item-categoria-texto {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-weight: bold;
+}
+
+.item-categoria.ativo .item-categoria-contagem { -fx-text-fill: -cor-primaria-clara; }
+
+.item-categoria-texto    { -fx-text-fill: -cor-texto-medio; -fx-font-size: 13px; }
+.item-categoria-contagem { -fx-text-fill: -cor-texto-fraco; -fx-font-size: 11px; }
+
+/* O ponto colorido da categoria fica atrás do ícone, como um selo. */
+.ponto-categoria {
+    -fx-min-width: 8;
+    -fx-pref-width: 8;
+    -fx-min-height: 8;
+    -fx-pref-height: 8;
+    -fx-background-radius: 4;
+}
+
+/* Título no topo de uma coluna ("Categorias"). O .rotulo, de 10,5 px, é para
+   o rótulo de um campo; como título de coluna ele sumia. */
+.titulo-coluna {
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+.coluna-notas {
+    -fx-min-width: 240;
+    -fx-pref-width: 360;
+    -fx-padding: 0 18 0 18;
+    -fx-border-color: transparent -cor-borda transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.cartao-nota { -fx-padding: 13 15 13 14; -fx-cursor: hand; }
+
+.cartao-nota.ativo {
+    -fx-border-color: -cor-primaria;
+    -fx-border-width: 1.5;
+    -fx-background-color: -cor-primaria-fundo;
+}
+
+.cartao-nota-titulo {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+.cartao-nota-resumo { -fx-text-fill: -cor-texto-fraco; -fx-font-size: 11.5px; }
+.cartao-nota-icone .icone-forma { -fx-stroke: -cor-texto-fraco; }
+.cartao-nota.ativo .cartao-nota-icone .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+.coluna-detalhe {
+    -fx-min-width: 300;
+    -fx-pref-width: 520;
+    -fx-background-color: transparent;
+}
+
+/* =========================================================== CÓDIGO ===== */
+
+.campo-codigo {
+    -fx-font-family: "Cascadia Code", "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 12.5px;
+}
+
+.bloco-codigo {
+    -fx-background-color: -cor-fundo;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.codigo-visual { -fx-line-spacing: 3; }
+
+/* Seleção sobre texto colorido (ui.TextoSelecionavel): o fundo translúcido
+   deixa as cores do destaque de sintaxe à vista por cima dele. */
+.texto-selecionavel-fundo {
+    -fx-fill: -cor-brilho-primaria;
+    -fx-stroke: transparent;
+}
+
+.texto-selecionavel:focused .texto-selecionavel-fundo { -fx-fill: rgba(74, 140, 255, 0.42); }
+
+.cod {
+    -fx-font-family: "Cascadia Code", "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 12.5px;
+}
+
+.cod-normal     { -fx-fill: -cor-texto; }
+.cod-palavra    { -fx-fill: #7FA9FF; -fx-font-weight: bold; }
+.cod-texto      { -fx-fill: #3DD68C; }
+.cod-numero     { -fx-fill: #F5B547; }
+.cod-comentario { -fx-fill: -cor-texto-fraco; -fx-font-style: italic; }
+
+.raiz.claro .cod-palavra { -fx-fill: #1B54C0; }
+.raiz.claro .cod-texto   { -fx-fill: #0E7350; }
+.raiz.claro .cod-numero  { -fx-fill: #9A6200; }
+
+/* ====================================================== TELA INICIAL ==== */
+
+.linha-compromisso {
+    -fx-padding: 12 14 12 12;
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+.linha-compromisso:hover { -fx-border-color: -cor-borda-forte; }
+
+/* O que já passou continua na lista, apagado: saber que a reunião das 9h
+   passou é tão útil quanto saber da próxima. */
+.linha-compromisso.passou { -fx-opacity: 0.38; }
+
+.linha-compromisso.iminente {
+    -fx-border-color: -cor-primaria;
+    -fx-background-color: -cor-primaria-fundo;
+}
+
+.hora-compromisso {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-min-width: 56;
+}
+
+.titulo-compromisso {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+/* A linha do "agora": o olho acha a posição do dia sem ler horário nenhum. */
+.divisor-agora { -fx-padding: 8 0 8 0; }
+
+.divisor-agora-texto {
+    -fx-text-fill: -cor-perigo;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.divisor-agora-linha {
+    -fx-background-color: -cor-perigo;
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+    -fx-opacity: 0.45;
+}
+
+/* ========================================================== RECADOS ===== */
+
+/* O papel adesivo. As oito cores vêm do código (CorRecado), com três tons
+   cada; aqui fica só a forma: canto de baixo mais arredondado e sombra
+   projetada para baixo, como papel apoiado na parede. */
+
+.post-it {
+    -fx-background-radius: 2 2 8 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 3, 5);
+    -fx-cursor: hand;
+}
+
+.post-it:hover { -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 18, 0, 4, 8); }
+
+.post-it-faixa {
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+    -fx-padding: 0 4 0 8;
+    -fx-background-radius: 2 2 0 0;
+}
+
+.post-it-corpo { -fx-padding: 12 15 18 15; -fx-min-height: 96; }
+
+.post-it-texto {
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe Print", "Comic Sans MS", "Segoe UI", sans-serif;
+}
+
+.post-it-fechar {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0 6 0 6;
+    -fx-min-height: 26;
+    -fx-cursor: hand;
+    -fx-opacity: 0.45;
+}
+
+.post-it-fechar:hover { -fx-opacity: 1; }
+.post-it-fechar .icone-forma { -fx-stroke: rgba(0, 0, 0, 0.75); -fx-stroke-width: 2.4; }
+
+.chip-cor {
+    -fx-min-width: 44;
+    -fx-min-height: 44;
+    -fx-pref-width: 44;
+    -fx-pref-height: 44;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-border-width: 2;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.chip-cor:selected {
+    -fx-border-color: -cor-primaria;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, -cor-brilho-primaria, 10, 0, 0, 0);
+}
+
+/* =========================================================== KANBAN ===== */
+
+/* Colunas lado a lado, cada uma com a sua rolagem. A coluna tem largura fixa
+   de propósito: coluna que estica conforme o conteúdo faz o quadro inteiro
+   dançar a cada cartão criado, e o olho perde a referência de onde as coisas
+   estavam. */
+
+.rolagem-quadro, .rolagem-quadro > .viewport { -fx-background-color: transparent; }
+
+.coluna-kanban {
+    -fx-background-color: -cor-painel;
+    -fx-background-radius: 12;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-min-width: 290;
+    -fx-pref-width: 290;
+    -fx-max-width: 290;
+    -fx-padding: 0 0 10 0;
+}
+
+/* A linha de cor no topo, acompanhando o canto arredondado da coluna. */
+.coluna-kanban-cor {
+    -fx-min-height: 3;
+    -fx-pref-height: 3;
+    -fx-background-radius: 12 12 0 0;
+}
+
+.coluna-kanban-cabecalho { -fx-padding: 12 10 10 14; }
+
+.coluna-kanban-nome {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+}
+
+.coluna-kanban-contagem {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-padding: 2 9 2 9;
+}
+
+.rolagem-coluna, .rolagem-coluna > .viewport { -fx-background-color: transparent; }
+.lista-cartoes { -fx-padding: 2 10 6 10; -fx-min-height: 60; }
+
+/* Enquanto um cartão paira sobre a área livre da coluna. */
+.lista-cartoes.recebendo {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-background-radius: 10;
+}
+
+.botao-novo-cartao {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 12.5px;
+    -fx-padding: 8 12 8 12;
+    -fx-background-radius: 0 0 12 12;
+}
+
+.botao-novo-cartao:hover {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto;
+    -fx-border-color: transparent;
+}
+
+.marca-arquivados {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 11px;
+    -fx-graphic-text-gap: 6;
+    -fx-padding: 6 0 2 4;
+}
+
+/* ------------------------------------------------------------- cartões -- */
+
+.cartao-kanban {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 11 12 8 12;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 4, 0, 0, 1);
+}
+
+.cartao-kanban:hover {
+    -fx-border-color: -cor-borda-forte;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 10, 0, 0, 3);
+}
+
+/* Arquivado continua visível, mas apagado: já saiu do fluxo. */
+.cartao-kanban.arquivado { -fx-opacity: 0.45; }
+
+.cartao-kanban-titulo {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.cartao-kanban-descricao {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 11.5px;
+}
+
+/* As ações só aparecem com o mouse sobre o cartão: quatro botões fixos em
+   cada cartão viram ruído quando a coluna tem dez deles. */
+.cartao-kanban-acoes { -fx-opacity: 0; }
+.cartao-kanban:hover .cartao-kanban-acoes { -fx-opacity: 1; }
+
+/* Botão de ícone reduzido, para caber no rodapé do cartão e no cabeçalho da
+   coluna sem dominá-los. */
+.botao-icone-miudo {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-width: 28;
+    -fx-pref-height: 28;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 7;
+}
+
+.botao-icone-miudo:hover { -fx-background-color: -cor-primaria; }
+.botao-icone-miudo.botao-icone-perigo:hover { -fx-background-color: -cor-perigo; }
+
+.alca-coluna { -fx-cursor: open-hand; }
+
+.botao-expandir {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 2 4 2 4;
+    -fx-cursor: hand;
+    -fx-background-radius: 6;
+}
+
+.botao-expandir:hover { -fx-background-color: -cor-superficie-topo; }
+
+/* ---------------------------------------------------------------- prazo -- */
+
+.etiqueta-prazo {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-graphic-text-gap: 5;
+    -fx-padding: 3 9 3 8;
+}
+
+.etiqueta-prazo .icone-forma { -fx-stroke: -cor-texto-fraco; }
+
+.etiqueta-prazo.prazo-vencido {
+    -fx-background-color: -cor-perigo-fundo;
+    -fx-text-fill: -cor-perigo;
+}
+
+.etiqueta-prazo.prazo-vencido .icone-forma { -fx-stroke: -cor-perigo; }
+
+.etiqueta-prazo.prazo-hoje {
+    -fx-background-color: -cor-atencao-fundo;
+    -fx-text-fill: -cor-atencao;
+}
+
+.etiqueta-prazo.prazo-hoje .icone-forma { -fx-stroke: -cor-atencao; }
+
+/* ================================================= ARRASTAR E SOLTAR ==== */
+
+/* O item em movimento some pela metade: fica claro que ele mudou de lugar, e
+   não que foi excluído. */
+.arrastando { -fx-opacity: 0.3; }
+
+/* A barra azul mostra de que lado o item vai entrar. */
+.alvo-antes {
+    -fx-border-color: -cor-primaria transparent transparent transparent;
+    -fx-border-width: 3 0 0 0;
+}
+
+.alvo-depois {
+    -fx-border-color: transparent transparent -cor-primaria transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+/* As mesmas marcas, de lado: o quadro Kanban move colunas na horizontal, e
+   uma barra em cima não diria de que lado a coluna vai entrar. */
+.alvo-antes-h {
+    -fx-border-color: transparent transparent transparent -cor-primaria;
+    -fx-border-width: 0 0 0 3;
+}
+
+.alvo-depois-h {
+    -fx-border-color: transparent -cor-primaria transparent transparent;
+    -fx-border-width: 0 3 0 0;
+}
+
+/* ============================== CONTROLES COMPOSTOS DO JAVAFX =========== */
+
+/* DatePicker, ComboBox, Spinner e Dialog são formados por várias peças
+   internas. Estilizar só o controle deixa as peças com a aparência clara
+   padrão do JavaFX, destoando do tema — daí esta seção existir. */
+
+.date-picker > .text-field,
+.combo-box > .text-field,
+.spinner > .text-field,
+.color-picker > .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: -cor-texto;
+    -fx-prompt-text-fill: -cor-texto-fraco;
+    -fx-border-width: 0;
+    -fx-highlight-fill: -cor-primaria;
+}
+
+.date-picker > .arrow-button,
+.combo-box > .arrow-button,
+.color-picker > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.date-picker > .arrow-button > .arrow,
+.combo-box > .arrow-button > .arrow,
+.color-picker > .arrow-button > .arrow { -fx-background-color: -cor-texto-fraco; }
+
+.date-picker:hover > .arrow-button > .arrow,
+.combo-box:hover > .arrow-button > .arrow { -fx-background-color: -cor-primaria; }
+
+.combo-box .list-cell { -fx-text-fill: -cor-texto; -fx-background-color: transparent; }
+
+.combo-box-popup .list-view {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 16, 0, 0, 5);
+}
+
+.combo-box-popup .list-cell       { -fx-padding: 8 12 8 12; -fx-text-fill: -cor-texto; }
+.combo-box-popup .list-cell:hover { -fx-background-color: -cor-primaria; -fx-text-fill: white; }
+
+.spinner > .increment-arrow-button,
+.spinner > .decrement-arrow-button { -fx-background-color: -cor-superficie; -fx-cursor: hand; }
+
+.spinner > .increment-arrow-button:hover,
+.spinner > .decrement-arrow-button:hover { -fx-background-color: -cor-primaria; }
+
+.spinner > .increment-arrow-button > .increment-arrow,
+.spinner > .decrement-arrow-button > .decrement-arrow { -fx-background-color: -cor-texto-fraco; }
+
+.check-box { -fx-text-fill: -cor-texto; }
+
+.check-box .box {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 3;
+}
+
+.check-box:hover .box    { -fx-border-color: -cor-primaria; }
+.check-box:selected .box { -fx-background-color: -cor-primaria; -fx-border-color: -cor-primaria; }
+.check-box:selected .mark { -fx-background-color: white; }
+
+.radio-button { -fx-text-fill: -cor-texto; }
+.radio-button .radio { -fx-background-color: -cor-superficie-alta; -fx-border-color: -cor-borda-forte; }
+.radio-button:selected .dot { -fx-background-color: -cor-primaria; }
+
+/* calendário do DatePicker */
+.date-picker-popup {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-width: 1;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 20, 0, 0, 6);
+}
+
+.date-picker-popup > .month-year-pane { -fx-background-color: -cor-superficie-alta; }
+.date-picker-popup > .month-year-pane .label { -fx-text-fill: -cor-texto; }
+
+.date-picker-popup > .month-year-pane .button > .left-arrow,
+.date-picker-popup > .month-year-pane .button > .right-arrow { -fx-background-color: -cor-texto-fraco; }
+
+.date-picker-popup > * > .day-name-cell {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto-fraco;
+}
+
+.date-picker-popup > * > .day-cell {
+    -fx-background-color: -cor-superficie;
+    -fx-text-fill: -cor-texto;
+    -fx-border-color: -cor-borda;
+}
+
+.date-picker-popup > * > .day-cell:hover { -fx-background-color: -cor-superficie-topo; }
+.date-picker-popup > * > .today          { -fx-border-color: -cor-primaria; -fx-border-width: 2; }
+.date-picker-popup > * > .selected       { -fx-background-color: -cor-primaria; -fx-text-fill: white; }
+
+.date-picker-popup > * > .previous-month,
+.date-picker-popup > * > .next-month { -fx-text-fill: -cor-texto-fraco; -fx-opacity: 0.45; }
+
+/* diálogos grandes (editores) */
+.dialog-pane { -fx-background-color: -cor-fundo; }
+.dialog-pane > .header-panel { -fx-background-color: -cor-painel; -fx-padding: 0; }
+.dialog-pane > .header-panel > .barra-titulo { -fx-background-color: -cor-painel; }
+.dialog-pane > .header-panel .label { -fx-text-fill: -cor-texto; -fx-font-size: 15px; }
+.dialog-pane > .content.label { -fx-text-fill: -cor-texto; -fx-font-size: 13px; }
+.dialog-pane .label { -fx-text-fill: -cor-texto; }
+.dialog-pane > .button-bar { -fx-padding: 14 18 16 18; }
+
+.dialog-pane > .button-bar > .container > .button {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-text-fill: -cor-texto;
+    -fx-background-radius: 9;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 9;
+    -fx-border-width: 1;
+    -fx-padding: 10 18 10 18;
+    -fx-cursor: hand;
+}
+
+.dialog-pane > .button-bar > .container > .button:hover { -fx-border-color: -cor-primaria; }
+
+.dialog-pane > .button-bar > .container > .botao-primario {
+    -fx-background-color: linear-gradient(to bottom, -cor-primaria-clara, -cor-primaria);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-width: 0;
+}
+
+.dialog-pane > .button-bar > .container > .botao-primario:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-cor-primaria-clara, 12%), -cor-primaria-clara);
+}
+
+/* abas */
+.tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: -cor-painel; }
+.tab-pane > .tab-header-area { -fx-padding: 6 0 0 8; }
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 9 9 0 0;
+    -fx-padding: 9 18 9 18;
+    -fx-cursor: hand;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:hover    { -fx-background-color: -cor-superficie-alta; }
+.tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -cor-fundo; }
+
+.tab-pane > .tab-header-area > .headers-region > .tab .tab-label { -fx-text-fill: -cor-texto-fraco; }
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .tab-label {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-weight: bold;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .focus-indicator { -fx-border-width: 0; }
+.tab-pane > .tab-content-area { -fx-background-color: -cor-fundo; }
+
+/* seletor de cor */
+.color-picker {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.color-palette { -fx-background-color: -cor-superficie; -fx-border-color: -cor-borda-forte; }
+
+/* menu de contexto */
+.context-menu {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(gaussian, -cor-sombra, 18, 0, 0, 5);
+}
+
+.context-menu .menu-item { -fx-background-radius: 7; -fx-padding: 8 14 8 10; }
+.context-menu .menu-item .label { -fx-text-fill: -cor-texto; -fx-font-size: 12.5px; }
+.context-menu .menu-item:focused { -fx-background-color: -cor-primaria; }
+.context-menu .menu-item:focused .label { -fx-text-fill: white; }
+
+.context-menu .separator:horizontal .line {
+    -fx-border-color: -cor-borda transparent transparent transparent;
+}
+
+/* deslizante */
+.slider .track { -fx-background-color: -cor-superficie-topo; -fx-background-radius: 4; }
+
+.slider .thumb {
+    -fx-background-color: -cor-primaria;
+    -fx-effect: dropshadow(gaussian, -cor-brilho-primaria, 8, 0, 0, 1);
+}
+
+.slider .axis { -fx-tick-label-fill: -cor-texto-fraco; }

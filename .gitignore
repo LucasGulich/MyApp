@@ -1,0 +1,26 @@
+# Saída do Maven: tudo aqui é gerado a partir do src\ e some num "mvn clean".
+target/
+
+# Pacotes gerados pelo empacotar.cmd (~70 MB cada). Distribua pelos
+# Releases do GitHub, não pelo repositório.
+distribuicao/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Sistema
+Thumbs.db
+desktop.ini
+
+# Os dados do aplicativo ficam em %APPDATA%\MyApp, fora do projeto — mas, por
+# garantia, nenhum banco, backup ou log entra no repositório por engano.
+*.db
+*.db-wal
+*.db-shm
+*.myappbkp
+*.log
