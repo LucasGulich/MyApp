@@ -7,6 +7,18 @@ e as versões seguem [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.9.1] — 2026-10-02
+
+### Corrigido
+
+- **Lembrete único com só aviso antecipado não se arquivava.** Um lembrete
+  para as 08:26 que avisa apenas *5 min antes*, confirmado às 08:21, ficava na
+  lista para sempre: a regra via a própria ocorrência das 08:26 como "algo pela
+  frente", e depois dela nenhum aviso sairia para dar outra chance de arquivar.
+  Agora a ocorrência confirmada não conta como futura.
+
+---
+
 ## [1.9.0] — 2026-09-24
 
 ### Adicionado

@@ -261,7 +261,7 @@ alguma coisa pela frente?* Se não tiver, ele vai para a lixeira.
 ```
 confirmar
     │
-    ├─ existe ocorrência futura?            → não arquiva  (repetido)
+    ├─ existe ocorrência futura além desta? → não arquiva  (repetido)
     ├─ falta algum aviso desta ocorrência?  → não arquiva  (o da hora ainda vem)
     ├─ há adiamento pendente?               → não arquiva  (você pediu para voltar)
     ├─ o lembrete está pausado?             → não arquiva  (escolha sua)
@@ -279,6 +279,11 @@ os dois casos que nunca mais vão disparar:
 A trava dos avisos múltiplos é a que mais importa no dia a dia: um compromisso
 que avisa *1 dia antes* e *na hora* não pode desaparecer quando você confirma
 o aviso da véspera.
+
+A ocorrência confirmada **não conta como futura**. Um lembrete único só com o
+aviso de *5 min antes*, confirmado antes da hora, já se arquiva: nada mais vai
+disparar, e esperar a hora passar deixaria o lembrete na lista para sempre —
+o arquivamento só acontece ao confirmar.
 
 Como é exclusão lógica, nada se perde. O alerta ainda mostra
 **"✓ Concluído — arquivado na lixeira"** por um instante antes de fechar,

@@ -356,12 +356,16 @@ nunca mais vai disparar.
 
 | Situação | Por que não arquiva |
 |---|---|
-| Há ocorrência futura | É um lembrete repetido; sumir seria perdê-lo |
+| Há ocorrência futura além da confirmada | É um lembrete repetido; sumir seria perdê-lo |
 | Falta um aviso da mesma ocorrência | Confirmar o "1 dia antes" não pode matar o aviso da hora |
 | Existe adiamento pendente | Você pediu para ele voltar; ele tem de voltar |
 
 Lembrete pausado também fica de fora: pausar é uma escolha do usuário, e o
 aplicativo não desfaz escolha do usuário.
+
+A ocorrência que está sendo confirmada não conta como "futura", mesmo que a
+hora dela ainda não tenha chegado: se o último aviso que faltava era um
+antecipado, confirmá-lo encerra o lembrete.
 
 **Por que é seguro:** o arquivamento é exclusão lógica. Nada sai do banco, e o
 lembrete volta pela Lixeira. O alerta ainda avisa "✓ Concluído — arquivado na

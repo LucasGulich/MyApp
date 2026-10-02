@@ -169,7 +169,6 @@ public class LembreteService {
 
     // ------------------------------------------------------ alertas na tela
 
-    /** Marca o alerta como visto. */
     /**
      * Marca o aviso como visto e, se o lembrete acabou, arquiva-o.
      *
@@ -223,8 +222,13 @@ public class LembreteService {
                 return false;
             }
         }
-        // E alguma ocorrência futura?
-        return CalculadoraOcorrencias.proxima(lembrete, LocalDateTime.now()).isEmpty();
+        // E alguma ocorrência futura além da confirmada? Ela própria não conta:
+        // se o aviso antecipado já era o último, confirmá-lo antes da hora
+        // encerra o lembrete — nada mais vai disparar.
+        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime depoisDaConfirmada = ocorrenciaConfirmada.plusSeconds(1);
+        LocalDateTime aPartirDe = depoisDaConfirmada.isAfter(agora) ? depoisDaConfirmada : agora;
+        return CalculadoraOcorrencias.proxima(lembrete, aPartirDe).isEmpty();
     }
 
     /** Adia o alerta pelos minutos configurados. */

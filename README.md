@@ -4,7 +4,7 @@
 > **lembretes, notas com senhas, Kanban e recados**, num aplicativo só,
 > com senha mestra e criptografia.
 
-**Versão atual:** 1.9.0 · **Plataforma:** Windows 10 e 11
+**Versão atual:** 1.9.1 · **Plataforma:** Windows 10 e 11
 
 ---
 

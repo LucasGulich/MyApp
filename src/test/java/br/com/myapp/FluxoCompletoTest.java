@@ -607,6 +607,26 @@ class FluxoCompletoTest {
     }
 
     @Test
+    @DisplayName("Confirmar antes da hora o último aviso antecipado arquiva")
+    void confirmarUltimoAvisoAntecipadoArquiva() {
+        SecurityService.definirSenha("MinhaSenha2026".toCharArray(), null);
+
+        LocalDateTime ocorrencia = LocalDateTime.now().plusMinutes(5);
+
+        Lembrete lembrete = novoLembrete("Ver se vão ter TEF", false);
+        lembrete.setTipo(TipoRecorrencia.UNICO);
+        lembrete.setInicio(ocorrencia);
+        lembrete.setAntecedencias(List.of(5));   // só o aviso de 5 min antes
+        servico.salvar(lembrete);
+        dao.registrarDisparo(lembrete.getId(), ocorrencia, 5);
+
+        boolean arquivou = servico.reconhecer(lembrete.getId(), ocorrencia);
+
+        assertTrue(arquivou, "nenhum aviso vai sair mais; o lembrete deveria se arquivar");
+        assertTrue(servico.porId(lembrete.getId()).orElseThrow().isExcluido());
+    }
+
+    @Test
     @DisplayName("Lembrete adiado não se arquiva ao confirmar")
     void adiadoNaoArquiva() {
         SecurityService.definirSenha("MinhaSenha2026".toCharArray(), null);
