@@ -52,6 +52,7 @@ novo depois — sem duplicar lógica.
 | `data` | Conexão com o SQLite e versionamento do esquema |
 | `security` | Criptografia, senha mestra, bloqueio por inatividade |
 | `backup` | Exportação e restauração cifradas |
+| `agendas` | Agendas do Google: leitura do .ics, sincronização, avisos, detalhes do evento e a aba em Configurações |
 | `modules` | Contrato de módulo e registro |
 | `modules.lembretes` | O primeiro módulo: agenda e alertas |
 | `modules.inicio` | A tela inicial: agenda do dia e recados |
@@ -155,6 +156,9 @@ SecurityService ──publica──► EstadoMudou  ──►  Shell (troca para
                                           ──►  cada módulo (redesenha)
 
 LembreteService ──publica──► ListaMudou   ──►  LembretesView (recarrega)
+
+AgendaService   ──publica──► AgendasMudaram ──► InicioView, PainelAgendas (recarregam)
+AvisosDeAgenda  ──publica──► AlertaDeAgenda ──► PopupAlerta, BandejaSistema
 ```
 
 O agendador não sabe que existe uma janela de alerta. Um módulo novo pode
@@ -162,6 +166,9 @@ passar a ouvir `AlertaDisparado` sem que o agendador mude uma linha.
 
 > **Atenção:** os ouvintes são chamados na thread de quem publicou. Quem mexe
 > na interface precisa envolver o trabalho em `Platform.runLater`.
+>
+> Quem vive menos que o aplicativo — uma janela que fecha — precisa sair com
+> `EventBus.deixarDeOuvir`, senão continua sendo chamado depois de fechado.
 
 ## Versionamento do banco
 
@@ -205,6 +212,7 @@ java -Dmyapp.home=E:\MyAppPortatil -jar myapp.jar
 | `agendador` | Varre a agenda a cada 20 s |
 | `vigia-inatividade` | Confere a inatividade a cada 1 min |
 | `backup-automatico` | Verifica de hora em hora se está na hora do backup |
+| `agendas` | Sincroniza as agendas do Google a cada 15 min |
 | `som-alerta` | Toca o som sem travar a interface |
 
 Todas são daemon: não seguram o encerramento do aplicativo.

@@ -1,5 +1,7 @@
 package br.com.myapp;
 
+import br.com.myapp.agendas.AgendaService;
+import br.com.myapp.agendas.AvisosDeAgenda;
 import br.com.myapp.backup.BackupService;
 import br.com.myapp.core.Config;
 import br.com.myapp.core.EventBus;
@@ -177,7 +179,18 @@ public class App extends Application {
             }
         });
 
+        // Aviso de evento do Google: o mesmo caminho, com o "G" da origem.
+        EventBus.ouvir(AvisosDeAgenda.AlertaDeAgenda.class, alerta -> {
+            PopupAlerta.mostrar(alerta);
+            if (bandeja != null && !alerta.atrasado()) {
+                boolean protegido = alerta.evento().agenda().isProtegida() && !SecurityService.estaDestrancado();
+                bandeja.notificar("MyApp - " + alerta.resumoTempo(),
+                        protegido ? "Evento protegido" : alerta.evento().evento().titulo());
+            }
+        });
+
         Scheduler.iniciar();
+        AgendaService.iniciar();
         SessionManager.iniciar();
 
         if (Config.get().backupAutomatico) {
@@ -214,6 +227,7 @@ public class App extends Application {
         Log.info("Encerrando o MyApp.");
         try {
             Scheduler.parar();
+            AgendaService.parar();
             SessionManager.parar();
             BackupService.pararAutomatico();
             SecurityService.trancar();       // apaga a chave da memória

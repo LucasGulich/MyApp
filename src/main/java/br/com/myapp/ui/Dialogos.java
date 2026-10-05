@@ -10,6 +10,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.input.KeyCode;
@@ -20,6 +21,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -58,6 +60,37 @@ import javafx.stage.Window;
 public final class Dialogos {
 
     private Dialogos() {
+    }
+
+    // ---------------------------------------------------------- formulários
+
+    /** O que a moldura do diálogo ocupa além do conteúdo: barra de título e botões. */
+    private static final double MOLDURA_DO_DIALOGO = 190;
+
+    /**
+     * Envolve um formulário numa rolagem que cabe na tela.
+     *
+     * <p>Sem isso, um formulário alto empurra os botões do diálogo para baixo
+     * da borda da tela — e o "Salvar" some justamente onde precisa estar. Com
+     * a escala do Windows em 125% ou 150%, a tela "encolhe" e qualquer
+     * formulário médio já passa do limite.
+     *
+     * @param altura altura desejada; vira menos se a tela não comportar
+     */
+    public static ScrollPane rolavel(Node formulario, double largura, double altura) {
+        ScrollPane rolagem = new ScrollPane(formulario);
+        rolagem.setFitToWidth(true);
+        rolagem.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        rolagem.getStyleClass().add("rolagem-formulario");
+        rolagem.setPrefViewportWidth(largura);
+        rolagem.setPrefViewportHeight(alturaQueCabe(altura));
+        return rolagem;
+    }
+
+    /** A altura pedida, ou a que sobra na tela depois da moldura do diálogo. */
+    public static double alturaQueCabe(double desejada) {
+        double tela = Screen.getPrimary().getVisualBounds().getHeight();
+        return Math.max(240, Math.min(desejada, tela - MOLDURA_DO_DIALOGO));
     }
 
     // ---------------------------------------------------------- perguntas

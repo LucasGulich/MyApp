@@ -78,13 +78,16 @@ configuração extra.
 
 ## Testes
 
-104 testes. As frentes principais:
+145 testes. As frentes principais:
 
 | Classe | O que cobre |
 |---|---|
 | `CalculadoraOcorrenciasTest` | Cálculo de datas: todas as recorrências e seus casos de borda |
 | `CryptoServiceTest` | Criptografia: ida e volta, chave errada, adulteração, IV único |
 | `FluxoCompletoTest` | Ponta a ponta: banco, senha, cifragem em disco, agendador rodando |
+| `ArquivoIcsTest` | Leitura do .ics no formato do Google: série com exceção, remarcada, cancelada, recusado, dia inteiro, fuso, link da reunião |
+| `AgendaFluxoTest` | Agenda de ponta a ponta contra um "Google" de mentira (servidor HTTP local): link cifrado, sincronizar, falhar sem perder a cópia, proteger, excluir |
+| `AvisosEVisoesTest` | Avisos dos eventos (hora certa, uma vez só, chegou atrasado do Google, já terminou, adiar, confirmar) e a agenda por período (intervalo uma vez por dia, férias em cada dia, ano inteiro) |
 
 O `FluxoCompletoTest` usa `@TempDir` com a propriedade `myapp.home`, de modo
 que cada teste roda em um banco próprio e descartável. Ele **não toca** no seu
@@ -124,12 +127,19 @@ O que o script faz:
    `myapp.jar`, e a compilação falharia no meio
 2. lê a versão do `pom.xml` (não é escrita em lugar nenhum: assim não tem como
    divergir do que foi empacotado)
-3. `mvn clean package` — compila e **roda os 99 testes**; build quebrado não
+3. `mvn clean package` — compila e **roda os 145 testes**; build quebrado não
    vira pacote
 4. monta `target\app` com o jar e as bibliotecas
 5. `jpackage --type app-image` → `target\instalador\MyApp\`
 6. compacta em `distribuicao\`, **fora de `target\`**, que qualquer
    `mvn clean` apagaria
+
+A versão também aparece no pé do menu ("By: Lucas Gulich · v1.11.0") e vem
+do mesmo lugar: no build, o Maven copia o `<version>` do `pom.xml` para
+`versao.properties`, o **único recurso filtrado** — o CSS e a configuração da
+ical4j ficam fora do filtro, para nada ser substituído neles. `core.Versao`
+lê esse arquivo; sem o filtro (rodando de uma IDE que não o aplica), mostra
+"dev". Para mudar a versão, basta o `pom.xml`.
 
 ### E o instalador `.msi`?
 

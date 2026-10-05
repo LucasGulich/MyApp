@@ -1,5 +1,6 @@
 package br.com.myapp.ui;
 
+import br.com.myapp.agendas.PainelAgendas;
 import br.com.myapp.backup.BackupService;
 import br.com.myapp.core.Config;
 import br.com.myapp.core.Log;
@@ -83,10 +84,15 @@ public class TelaConfiguracoes {
         ButtonType salvar = new ButtonType("Salvar", ButtonBar.ButtonData.OK_DONE);
         dialogo.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, salvar);
 
+        // A aba de agendas age na hora (conectar, sincronizar, excluir), sem
+        // esperar o Salvar: é cadastro, não preferência. Ver PainelAgendas.
+        PainelAgendas agendas = new PainelAgendas(dono);
+
         TabPane abas = new TabPane(
                 aba("Aparência", abaAparencia()),
                 aba("Segurança", abaSeguranca()),
                 aba("Lembretes", abaLembretes()),
+                aba("Agendas", agendas),
                 aba("Sistema", abaSistema()),
                 aba("Backup", abaBackup()));
         abas.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -100,6 +106,7 @@ public class TelaConfiguracoes {
         carregar();
 
         Optional<ButtonType> escolha = dialogo.showAndWait();
+        agendas.desligar();
         if (escolha.isPresent() && escolha.get() == salvar) {
             gravar();
         }
@@ -385,6 +392,7 @@ public class TelaConfiguracoes {
         Label erro = new Label();
         erro.getStyleClass().add("texto-perigo");
         erro.setWrapText(true);
+        erro.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         erro.setVisible(false);
 
         VBox conteudo = new VBox(12, atual, nova, confirma, dica, erro);
@@ -489,6 +497,7 @@ public class TelaConfiguracoes {
 
         Label texto = new Label(explicacao);
         texto.setWrapText(true);
+        texto.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         texto.getStyleClass().add("subtitulo");
 
         PasswordField campo = new PasswordField();
@@ -524,6 +533,7 @@ public class TelaConfiguracoes {
         Label l = new Label(texto);
         l.getStyleClass().add("texto-fraco");
         l.setWrapText(true);
+        l.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         l.setMaxWidth(520);
         return l;
     }

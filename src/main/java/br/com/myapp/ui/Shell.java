@@ -1,6 +1,7 @@
 package br.com.myapp.ui;
 
 import br.com.myapp.core.Config;
+import br.com.myapp.core.Versao;
 import br.com.myapp.core.EventBus;
 import br.com.myapp.core.Log;
 import br.com.myapp.modules.AppModule;
@@ -55,6 +56,9 @@ public class Shell extends BorderPane {
 
     private final Button botaoConfiguracoes = new Button();
     private final Button botaoTrancar = new Button();
+
+    /** "By: Lucas Gulich · v1.11.0", miúdo, no pé do menu. Recolhido, só a versão. */
+    private final Label assinatura = new Label();
 
     private final Label marca = new Label();
     private final HBox linhaDaMarca = new HBox(8);
@@ -177,7 +181,10 @@ public class Shell extends BorderPane {
         botaoTrancar.setTooltip(new Tooltip("Tranca o aplicativo agora (Ctrl+L)"));
         botaoTrancar.setOnAction(e -> SecurityService.trancar());
 
-        menu.getChildren().addAll(new Region(), botaoConfiguracoes, botaoTrancar);
+        assinatura.getStyleClass().add("assinatura-menu");
+        assinatura.setMaxWidth(Double.MAX_VALUE);
+
+        menu.getChildren().addAll(new Region(), botaoConfiguracoes, botaoTrancar, assinatura);
 
         recolher(Config.get().menuRecolhido);
         return menu;
@@ -226,6 +233,10 @@ public class Shell extends BorderPane {
         }
         ajustarItem(botaoConfiguracoes, "Configurações", recolhido);
         ajustarItem(botaoTrancar, "Trancar o aplicativo agora (Ctrl+L)", recolhido);
+
+        // Na faixa recolhida não cabe o nome; a versão, sim.
+        assinatura.setText(recolhido ? "v" + Versao.atual() : "By: Lucas Gulich  ·  v" + Versao.atual());
+        assinatura.setAlignment(recolhido ? Pos.CENTER : Pos.CENTER_LEFT);
     }
 
     private void ajustarItem(Button botao, String nome, boolean recolhido) {

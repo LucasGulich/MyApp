@@ -30,6 +30,9 @@ public class Config {
      */
     public boolean menuRecolhido = false;
 
+    /** Como a agenda da tela inicial é vista: DIA, SEMANA, MES ou ANO. */
+    public String visaoAgenda = "DIA";
+
     // ----- Segurança -----
     /** Minutos de inatividade até bloquear sozinho. 0 desliga o recurso. */
     public int minutosParaBloquear = 15;

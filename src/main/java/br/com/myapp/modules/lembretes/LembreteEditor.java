@@ -1,6 +1,7 @@
 package br.com.myapp.modules.lembretes;
 
 import br.com.myapp.core.Config;
+import br.com.myapp.core.Texto;
 import br.com.myapp.core.WindowsIntegracao;
 import br.com.myapp.security.SecurityService;
 import br.com.myapp.ui.Icone;
@@ -95,9 +96,22 @@ public class LembreteEditor {
     private final VBox blocoFim = new VBox(8);
 
     public LembreteEditor(Window dono, Lembrete existente) {
+        this(dono, existente == null ? new Lembrete() : existente, existente == null);
+    }
+
+    private LembreteEditor(Window dono, Lembrete lembrete, boolean ehNovo) {
         this.dono = dono;
-        this.ehNovo = existente == null;
-        this.lembrete = existente == null ? new Lembrete() : existente;
+        this.lembrete = lembrete;
+        this.ehNovo = ehNovo;
+    }
+
+    /**
+     * Um lembrete novo, já preenchido com um modelo — o "Criar lembrete a
+     * partir deste" de um evento do Google. A janela se apresenta como
+     * criação ("Novo lembrete", "Criar lembrete"), e não como edição.
+     */
+    public static LembreteEditor novoAPartirDe(Window dono, Lembrete modelo) {
+        return new LembreteEditor(dono, modelo, true);
     }
 
     /**
@@ -122,7 +136,7 @@ public class LembreteEditor {
         // Mais largo que antes: as seções precisam de espaço para respirar,
         // e vários campos passam a caber lado a lado em vez de empilhados.
         rolagem.setPrefViewportWidth(640);
-        rolagem.setPrefViewportHeight(620);
+        rolagem.setPrefViewportHeight(Dialogos.alturaQueCabe(620));
         dialogo.getDialogPane().setContent(rolagem);
 
         Dialogos.aplicarTema(dialogo.getDialogPane());
@@ -478,27 +492,7 @@ public class LembreteEditor {
 
     /** Aceita "14:30", "1430" e "14" - os três jeitos de digitar as pressas. */
     private LocalTime interpretarHora(String texto) {
-        if (texto == null || texto.isBlank()) {
-            return LocalTime.of(9, 0);
-        }
-        String limpo = texto.trim().replace("h", ":").replace(".", ":");
-        try {
-            if (limpo.contains(":")) {
-                String[] partes = limpo.split(":");
-                int hora = Integer.parseInt(partes[0].trim());
-                int minuto = partes.length > 1 && !partes[1].isBlank()
-                        ? Integer.parseInt(partes[1].trim()) : 0;
-                return LocalTime.of(Math.floorMod(hora, 24), Math.floorMod(minuto, 60));
-            }
-            if (limpo.length() == 4) {
-                return LocalTime.of(
-                        Math.floorMod(Integer.parseInt(limpo.substring(0, 2)), 24),
-                        Math.floorMod(Integer.parseInt(limpo.substring(2)), 60));
-            }
-            return LocalTime.of(Math.floorMod(Integer.parseInt(limpo), 24), 0);
-        } catch (Exception e) {
-            return LocalTime.of(9, 0);
-        }
+        return Texto.interpretarHora(texto, LocalTime.of(9, 0));
     }
 
     private String paraHex(Color cor) {

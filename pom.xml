@@ -7,7 +7,7 @@
 
     <groupId>br.com.myapp</groupId>
     <artifactId>myapp</artifactId>
-    <version>1.9.1</version>
+    <version>1.11.0</version>
     <packaging>jar</packaging>
 
     <name>MyApp</name>
@@ -22,6 +22,7 @@
         <javafx.platform>win</javafx.platform>
         <sqlite.version>3.47.1.0</sqlite.version>
         <jackson.version>2.18.2</jackson.version>
+        <ical4j.version>4.0.8</ical4j.version>
 
         <main.class>br.com.myapp.Main</main.class>
     </properties>
@@ -66,6 +67,26 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!-- Leitura de agendas no formato iCalendar (.ics), como a do Google.
+             O Groovy e o jparsec servem só aos filtros e construtores em
+             linguagem própria da biblioteca, que o MyApp não usa: ficam de
+             fora e poupam uns 7 MB do pacote. Ver a decisão 42. -->
+        <dependency>
+            <groupId>org.mnode.ical4j</groupId>
+            <artifactId>ical4j</artifactId>
+            <version>${ical4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jparsec</groupId>
+                    <artifactId>jparsec</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Testes -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -77,6 +98,28 @@
 
     <build>
         <finalName>myapp</finalName>
+
+        <!-- O número da versão chega ao aplicativo por versao.properties, que é o
+             único arquivo filtrado: o Maven troca ${project.version} pelo valor
+             daqui. Os demais recursos ficam fora do filtro de propósito - o CSS
+             e a configuração da ical4j não podem ter nada substituído. -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>versao.properties</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>versao.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

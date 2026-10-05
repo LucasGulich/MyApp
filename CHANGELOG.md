@@ -7,6 +7,155 @@ e as versões seguem [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.11.0] — 2026-10-05
+
+### Adicionado
+
+- **Agenda em dia, semana, mês e ano.** O painel da tela inicial virou
+  "Agenda", com a barra `[‹] Hoje [›]  Outubro de 2026  [Dia|Semana|Mês|Ano]`.
+
+  | Visão | O que mostra |
+  |---|---|
+  | Dia | A lista de sempre — agora de qualquer dia, não só de hoje |
+  | Semana | Sete colunas, de segunda a domingo |
+  | Mês | A folhinha, com até 3 por dia e "+2 mais" |
+  | Ano | Doze folhinhas; o dia pinta mais forte quanto mais cheio |
+
+  Clicar no número de um dia abre o dia; no nome do mês, o mês. A visão
+  escolhida fica guardada. Lembrete "a cada X minutos" aparece uma vez por dia
+  na grade (↻), e férias de vários dias aparecem em cada dia. Ver a decisão 46.
+- **Avisos dos eventos do Google.** Cada agenda escolhe quando avisar (na
+  hora, 5, 10, 15, 30 min, 1 h, 1 dia), se toca som e se avisa os de dia
+  inteiro, e a que horas do dia (9h, se não mexer). O aviso traz **Entrar** quando a reunião tem link, além de
+  Adiar e Confirmar. Um evento que chega do Google depois da hora do aviso
+  ainda avisa; o que já terminou, não. Ver a decisão 45.
+  Agenda conectada antes desta versão começa avisando **10 min antes**.
+- **Detalhes do evento.** Clicar num evento — na lista, na semana, no mês ou
+  nas fichas de dia inteiro — mostra a descrição inteira, **Entrar na
+  reunião**, **Abrir no Google Agenda** (no dia do evento) e **Criar lembrete
+  a partir deste**, com título, horário, cor e link já preenchidos.
+- **Clicar num lembrete** na agenda abre o cadastro dele. Com o MyApp
+  trancado, o clique não abre nada.
+- **Botão de sincronizar as agendas na tela inicial.** Só o ícone ⟳, no canto
+  do painel Agenda, e só aparece com alguma agenda do Google conectada. Ao
+  parar o mouse, diz quais agendas são e quando foi a última sincronização;
+  enquanto sincroniza, o ícone gira, e no fim um aviso diz como foi — com o
+  nome da agenda que falhou, se alguma falhar.
+- **Assinatura no pé do menu**: "By: Lucas Gulich · v1.11.0", miúda, abaixo
+  do Trancar. Com o menu recolhido, só a versão. O número vem do `pom.xml`
+  pelo build (`versao.properties`, `core.Versao`), então não tem como ficar
+  desatualizado.
+
+### Corrigido
+
+- **"Salvar" fora da tela no cadastro de agenda.** Com os textos inteiros (a
+  correção dos "..." da 1.10) e a seção de avisos, o formulário passou da
+  altura da tela. Agora ele rola, com os botões sempre à vista. A regra virou
+  global (`Dialogos.rolavel`), e os cadastros de lembrete, nota e cartão
+  também passaram a respeitar a altura da tela.
+- **"Criar lembrete a partir deste" abria um cadastro travado.** O cadastro
+  recebia cliques, mas não o movimento do mouse: cursor sem a mãozinha,
+  rolagem parada, nada reagindo ao passar por cima. Ele era aberto dentro do
+  próprio clique, com o painel do evento ainda fechando — e, no Windows, a
+  janela que fecha continua dona do mouse. Agora o cadastro só abre depois
+  que o painel termina de fechar.
+- **Seletor Dia | Semana | Mês | Ano com bordas quebradas.** As pontas eram
+  arredondadas com `:first-child`/`:last-child`, que o CSS do JavaFX não tem.
+  Virou uma pílula única, com a visão escolhida destacada dentro dela; as
+  setas e o "Hoje" ganharam o mesmo formato.
+- **"+2 mais" cortado no mês**: a célula tinha altura fixa; agora cresce.
+- **Botões da agenda viravam "..." com a janela estreita** ("Hoje", "Semana"…). Agora eles mantêm o tamanho e quem cede é o título do período.
+
+### Projeto
+
+- Migração 8: tabela `disparo_agenda`, os avisos de evento que já saíram.
+- Migração 9: `agenda.hora_dia_inteiro`, a hora do aviso de dia inteiro.
+- A leitura de hora digitada ("8h30", "0830") saiu do cadastro de lembrete
+  para `Texto.interpretarHora`, e o cadastro de agenda usa a mesma.
+- `AgendaService` guarda também as consultas fora da janela de 40 dias (o ano
+  inteiro), para a visão de ano não recalcular a cada redesenho.
+- Ícone novo: `SETA_ESQUERDA`.
+- 14 testes novos (`AvisosEVisoesTest`, `TextoTest`). Total: 145.
+
+---
+
+## [1.10.0] — 2026-10-05
+
+### Adicionado
+
+- **Agendas do Google na tela Hoje.** Em Configurações → **Agendas**, cole o
+  "endereço secreto no formato iCal" da sua agenda do Google e os eventos
+  passam a aparecer junto com os lembretes, sem trocar de janela. Só leitura:
+  criar e alterar evento continua sendo no Google. Ver
+  [docs/AGENDAS.md](docs/AGENDAS.md).
+
+  ```
+  DIA INTEIRO  ( Aniversário da Ana )
+  ▍14:41  Reunião com cliente — Zimmermann   [acontecendo] [↗ Entrar]  G
+  ▍até 15:41  Local: Google Meet
+  ```
+
+  - Botão **Testar** no cadastro: baixa a agenda na hora e mostra quantos
+    eventos vieram e qual é o próximo, para conferir o link antes de salvar.
+  - Sincroniza a cada 15 min, ao destrancar e no botão ⟳. Sem rede, vale a
+    última cópia, e a aba Agendas diz o que deu errado.
+  - Evento com duração ("até 15:41"), **acontecendo** enquanto dura, e
+    **Entrar** quando tem link do Meet, Teams ou Zoom.
+  - Aniversários e feriados em fichas de **dia inteiro** no topo do painel.
+  - Ocorrência remarcada aparece uma vez só, no horário novo; cancelados
+    somem; convites recusados também, se a agenda pedir.
+  - Várias agendas, cada uma com a sua cor; um **G** discreto marca a origem.
+  - O endereço secreto vai **sempre cifrado** para o banco. A agenda pode ser
+    marcada como protegida: trancado, os eventos aparecem como "Evento
+    protegido", só com o horário.
+
+### Corrigido
+
+- **Textos de explicação cortados com "..." nos formulários.** Com a escala
+  do Windows acima de 100%, o JavaFX dava a um texto de várias linhas menos
+  altura do que ele precisa e cortava o fim ("Endereço secreto no..."). As
+  dicas de todo formulário (`Secao.dica`), as explicações das Configurações e
+  as opções do cadastro de agenda agora sempre ganham as linhas de que
+  precisam.
+
+### Projeto
+
+- Dependência nova: **ical4j** 4.0.8, para ler o formato .ics (recorrência,
+  exceções, fuso) — sem o Groovy e o jparsec que ela traria. Configurada para
+  nunca ir à internet por conta própria. Ver a decisão 42.
+- Migração 7: tabela `agenda`. Guarda o .ics inteiro em vez de uma tabela de
+  eventos, para nada precisar ser apagado. Ver a decisão 44.
+- O endereço secreto, depois de decifrado, fica na memória até o aplicativo
+  fechar, para a sincronização continuar com o app trancado. Ver a decisão 43.
+- `EventBus.deixarDeOuvir`, para quem vive menos que o aplicativo (a janela
+  de configurações) não continuar sendo chamado depois de fechado.
+- 26 testes novos (`ArquivoIcsTest`, `AgendaFluxoTest`), o segundo contra um
+  "Google" de mentira num servidor HTTP local. Total: 131.
+
+---
+
+## [1.9.2] — 2026-10-05
+
+### Alterado
+
+- **A linha do "agora" na tela Hoje virou a linha da hora atual.** Mostra o
+  relógio e quanto falta para o próximo compromisso — "14:21 · próximo em
+  3 h 39 min" —, ou "nada mais hoje". A palavra "agora", em vermelho logo
+  acima de um compromisso das 18h, parecia dizer que ele era agora. Parar o
+  mouse sobre a linha explica o que ela é.
+- **A linha aparece sempre**, inclusive no topo (nada passou ainda) e no fim
+  (tudo já passou), e ficou **fina e num vermelho mais vivo**, com um ponto no
+  começo. Antes ela era esticada até a altura do texto e virava uma faixa.
+
+### Corrigido
+
+- **A tela Hoje não andava com o relógio.** Só era redesenhada quando um
+  lembrete mudava: com ela aberta, a reunião das 15h seguia como "ainda vem"
+  às 15h30. Agora tudo se atualiza a cada minuto, inclusive depois de o
+  computador voltar da suspensão.
+
+---
+
 ## [1.9.1] — 2026-10-02
 
 ### Corrigido

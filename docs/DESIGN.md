@@ -338,6 +338,22 @@ new Secao(Icone.Simbolo.CODIGO, "CÓDIGO", bloco)
         .comAcoes(Botoes.miudo("Copiar tudo", Icone.Simbolo.COPIAR));
 ```
 
+**Formulário em diálogo vai dentro de uma rolagem que cabe na tela.** Com a
+escala do Windows em 125% ou 150%, a tela "encolhe", e um formulário médio já
+empurra o "Salvar" para fora dela. `Dialogos.rolavel` resolve de uma vez:
+
+```java
+dialogo.getDialogPane().setContent(Dialogos.rolavel(formulario, 520, 640));
+```
+
+A altura pedida vira menos se a tela não comportar (`Dialogos.alturaQueCabe`).
+
+**Texto que quebra linha precisa de altura mínima.** Dentro de um diálogo, o
+JavaFX às vezes dá a um rótulo de várias linhas menos altura do que ele
+precisa, e corta o fim com "...". `Secao.dica` já se protege; rótulo próprio
+com `setWrapText(true)` leva junto
+`setMinHeight(Region.USE_PREF_SIZE)`.
+
 ---
 
 ## Busca

@@ -29,6 +29,18 @@ public final class EventBus {
         OUVINTES.computeIfAbsent(tipo, k -> new CopyOnWriteArrayList<>()).add(ouvinte);
     }
 
+    /**
+     * Retira um ouvinte. Necessário para quem vive menos que o aplicativo —
+     * uma janela que fecha —, senão ele continuaria sendo chamado depois de
+     * fechada, e preso na memória.
+     */
+    public static <T> void deixarDeOuvir(Class<T> tipo, Consumer<T> ouvinte) {
+        List<Consumer<?>> lista = OUVINTES.get(tipo);
+        if (lista != null) {
+            lista.remove(ouvinte);
+        }
+    }
+
     /** Publica um evento para todos os ouvintes daquele tipo. */
     @SuppressWarnings("unchecked")
     public static <T> void publicar(T evento) {

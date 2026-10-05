@@ -314,6 +314,81 @@ public final class Database {
                 "CREATE INDEX idx_kanban_card_coluna ON kanban_card(coluna_id, data_exclusao, ordem)"
         });
 
+        // --- versão 7: agendas externas (Google Agenda) ---
+        //
+        // Uma linha por agenda conectada. O endereço secreto vai sempre
+        // cifrado: quem tem esse link lê a agenda inteira.
+        //
+        // Os eventos não têm tabela própria. O arquivo .ics baixado fica
+        // inteiro em `conteudo`, substituído a cada sincronização, e os
+        // eventos são calculados em memória. Uma tabela de eventos obrigaria
+        // a apagar os que somem do Google — e aqui nada se apaga.
+        //
+        // As colunas de aviso (antecedencias, som_ativo, avisar_dia_inteiro)
+        // já nascem aqui para a etapa dos alertas não precisar de outra
+        // migração.
+        lista.add(new String[]{
+                """
+                CREATE TABLE agenda (
+                    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome               TEXT    NOT NULL,
+                    cor                TEXT,
+                    link               TEXT    NOT NULL,
+                    conteudo           TEXT,
+                    sincronizada_em    INTEGER,
+                    ultimo_erro        TEXT,
+                    antecedencias      TEXT    NOT NULL DEFAULT '10',
+                    som_ativo          INTEGER NOT NULL DEFAULT 0,
+                    avisar_dia_inteiro INTEGER NOT NULL DEFAULT 0,
+                    ocultar_recusados  INTEGER NOT NULL DEFAULT 1,
+                    protegida          INTEGER NOT NULL DEFAULT 0,
+                    criado_em          INTEGER NOT NULL,
+                    atualizado_em      INTEGER NOT NULL,
+                    data_exclusao      INTEGER
+                )
+                """,
+                "CREATE INDEX idx_agenda_viva ON agenda(data_exclusao, nome)"
+        });
+
+        // --- versão 8: avisos dos eventos das agendas externas ---
+        //
+        // O irmão da tabela `disparo` dos lembretes. Não dá para reaproveitar
+        // aquela: ela aponta para `lembrete` com chave estrangeira, e um
+        // evento do Google não é lembrete. Aqui o evento é identificado pelo
+        // uid do Google mais o horário da ocorrência — o mesmo uid se repete
+        // em todas as ocorrências de uma série.
+        //
+        // O adiamento mora na própria linha (`adiar_ate`): um aviso de evento
+        // é adiado no máximo uma vez por vez, e uma tabela à parte, como a dos
+        // lembretes, não traria nada.
+        lista.add(new String[]{
+                """
+                CREATE TABLE disparo_agenda (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    agenda_id     INTEGER NOT NULL REFERENCES agenda(id),
+                    uid           TEXT    NOT NULL,
+                    ocorrencia    INTEGER NOT NULL,
+                    antecedencia  INTEGER NOT NULL,
+                    disparado_em  INTEGER NOT NULL,
+                    reconhecido   INTEGER NOT NULL DEFAULT 0,
+                    adiar_ate     INTEGER,
+                    data_exclusao INTEGER,
+                    UNIQUE (agenda_id, uid, ocorrencia, antecedencia)
+                )
+                """,
+                "CREATE INDEX idx_disparo_agenda_recente ON disparo_agenda(agenda_id, ocorrencia)",
+                "CREATE INDEX idx_disparo_agenda_adiado ON disparo_agenda(adiar_ate)"
+        });
+
+        // --- versão 9: hora do aviso de dia inteiro, escolhida por agenda ---
+        //
+        // Até aqui era fixo às 9h. Guardado como texto "HH:mm", e não em
+        // minutos: é uma hora do relógio, lida no banco do jeito que aparece na
+        // tela.
+        lista.add(new String[]{
+                "ALTER TABLE agenda ADD COLUMN hora_dia_inteiro TEXT NOT NULL DEFAULT '09:00'"
+        });
+
         return lista;
     }
 

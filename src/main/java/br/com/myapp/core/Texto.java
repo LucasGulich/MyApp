@@ -1,6 +1,7 @@
 package br.com.myapp.core;
 
 import java.text.Normalizer;
+import java.time.LocalTime;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -52,5 +53,41 @@ public final class Texto {
             return true;
         }
         return paraBusca(texto).contains(alvo);
+    }
+
+    // ---------------------------------------------------------------- hora
+
+    /**
+     * Uma hora digitada do jeito que se fala: "8", "8h", "8h30", "8.30",
+     * "0830", "08:30". Hora e minuto fora do relógio dão a volta ("25" vira
+     * 01:00) em vez de recusar.
+     *
+     * <p>Todo campo de hora do aplicativo lê por aqui, para "8h30" valer no
+     * lembrete e na agenda do mesmo jeito.
+     *
+     * @param padrao o que devolver se o texto estiver vazio ou não for hora
+     */
+    public static LocalTime interpretarHora(String texto, LocalTime padrao) {
+        if (texto == null || texto.isBlank()) {
+            return padrao;
+        }
+        String limpo = texto.trim().toLowerCase(Locale.ROOT).replace("h", ":").replace(".", ":");
+        try {
+            if (limpo.contains(":")) {
+                String[] partes = limpo.split(":");
+                int hora = Integer.parseInt(partes[0].trim());
+                int minuto = partes.length > 1 && !partes[1].isBlank()
+                        ? Integer.parseInt(partes[1].trim()) : 0;
+                return LocalTime.of(Math.floorMod(hora, 24), Math.floorMod(minuto, 60));
+            }
+            if (limpo.length() == 4) {
+                return LocalTime.of(
+                        Math.floorMod(Integer.parseInt(limpo.substring(0, 2)), 24),
+                        Math.floorMod(Integer.parseInt(limpo.substring(2)), 60));
+            }
+            return LocalTime.of(Math.floorMod(Integer.parseInt(limpo), 24), 0);
+        } catch (RuntimeException e) {
+            return padrao;
+        }
     }
 }

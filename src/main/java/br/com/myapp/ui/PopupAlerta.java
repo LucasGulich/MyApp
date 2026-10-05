@@ -1,5 +1,8 @@
 package br.com.myapp.ui;
 
+import br.com.myapp.agendas.Agenda;
+import br.com.myapp.agendas.AvisosDeAgenda;
+import br.com.myapp.agendas.Evento;
 import br.com.myapp.core.Config;
 import br.com.myapp.core.Log;
 import br.com.myapp.core.Scheduler;
@@ -77,11 +80,7 @@ public class PopupAlerta {
         Lembrete lembrete = alerta.lembrete();
         boolean esconderConteudo = lembrete.isSensivel() && !SecurityService.estaDestrancado();
 
-        Stage janela = new Stage(StageStyle.TRANSPARENT);
-        janela.setAlwaysOnTop(true);
-        // não entra na barra de tarefas e não rouba o foco da janela ativa.
-        janela.initModality(javafx.stage.Modality.NONE);
-        janela.setResizable(false);
+        Stage janela = novaJanela();
 
         // ---------- Conteúdo ----------
         Label quando = new Label(alerta.resumoTempo().toUpperCase()
@@ -158,10 +157,15 @@ public class PopupAlerta {
             botoes.getChildren().add(abrir);
         }
 
-        Region espaco = new Region();
-        HBox.setHgrow(espaco, javafx.scene.layout.Priority.ALWAYS);
         botoes.getChildren().addAll(adiar, ok);
+        exibir(janela, corpo, botoes);
+    }
 
+    /**
+     * Põe o aviso na tela: moldura, tema, posição na pilha e o surgir suave.
+     * Igual para lembrete e para evento de agenda.
+     */
+    private static void exibir(Stage janela, VBox corpo, HBox botoes) {
         VBox raiz = new VBox(12, corpo, botoes);
         raiz.getStyleClass().addAll("raiz", "popup-alerta");
         if ("claro".equals(Config.get().tema)) {
@@ -189,6 +193,135 @@ public class PopupAlerta {
         surgir.setToValue(1);
         surgir.play();
     }
+
+    private static Stage novaJanela() {
+        Stage janela = new Stage(StageStyle.TRANSPARENT);
+        janela.setAlwaysOnTop(true);
+        // não entra na barra de tarefas e não rouba o foco da janela ativa.
+        janela.initModality(javafx.stage.Modality.NONE);
+        janela.setResizable(false);
+        return janela;
+    }
+
+    // ------------------------------------------------- evento de agenda
+
+    /** Mostra o aviso de um evento do Google. Pode ser chamado de qualquer thread. */
+    public static void mostrar(AvisosDeAgenda.AlertaDeAgenda alerta) {
+        Platform.runLater(() -> {
+            try {
+                construir(alerta);
+                if (alerta.evento().agenda().isSomAtivo()) {
+                    WindowsIntegracao.tocarAlerta();
+                }
+            } catch (Exception e) {
+                Log.erro("Falha ao exibir o aviso de agenda", e);
+            }
+        });
+    }
+
+    /**
+     * O aviso de evento: o mesmo desenho do lembrete, com o "G" da origem, o
+     * horário de término e o botão Entrar quando a reunião tem link.
+     *
+     * Confirmar só marca como visto — o evento não é do MyApp, não há o que
+     * arquivar.
+     */
+    private static void construir(AvisosDeAgenda.AlertaDeAgenda alerta) {
+        Evento evento = alerta.evento().evento();
+        Agenda agenda = alerta.evento().agenda();
+        boolean esconderConteudo = agenda.isProtegida() && !SecurityService.estaDestrancado();
+
+        Stage janela = novaJanela();
+
+        String horario = evento.diaInteiro()
+                ? "DIA INTEIRO"
+                : HORA.format(evento.inicio()) + " – " + HORA.format(evento.fim());
+        Label quando = new Label(alerta.resumoTempo().toUpperCase() + "  •  " + horario);
+        quando.getStyleClass().add("quando-alerta");
+
+        Label selo = new Label("G");
+        selo.getStyleClass().add("selo-agenda");
+        Region espacoTopo = new Region();
+        HBox.setHgrow(espacoTopo, javafx.scene.layout.Priority.ALWAYS);
+        HBox topo = new HBox(8, quando, espacoTopo, selo);
+        topo.setAlignment(Pos.CENTER_LEFT);
+
+        Label titulo = new Label(esconderConteudo ? "Evento protegido" : evento.titulo());
+        titulo.getStyleClass().add("titulo-alerta");
+        titulo.setWrapText(true);
+        if (esconderConteudo) {
+            titulo.setGraphic(Icone.de(Icone.Simbolo.CADEADO, 17, "icone-atencao"));
+        }
+
+        VBox corpo = new VBox(4, topo, titulo);
+
+        if (!esconderConteudo && !evento.local().isBlank()) {
+            Label local = new Label("Local: " + evento.local());
+            local.getStyleClass().add("texto-fraco");
+            local.setWrapText(true);
+            local.setMaxWidth(LARGURA - 60);
+            corpo.getChildren().add(local);
+        }
+        Label origem = new Label("Google Agenda · " + agenda.getNome());
+        origem.getStyleClass().add("texto-fraco");
+        corpo.getChildren().add(origem);
+
+        if (alerta.atrasado()) {
+            Label atrasado = new Label("Este aviso estava pendente desde "
+                    + DATA_HORA.format(alerta.instanteDoAviso()) + ".");
+            atrasado.getStyleClass().add("texto-alerta");
+            atrasado.setWrapText(true);
+            atrasado.setMaxWidth(LARGURA - 60);
+            corpo.getChildren().add(atrasado);
+        }
+
+        int minutosSnooze = Config.get().minutosSnooze;
+        HBox botoes = new HBox(8);
+        botoes.setAlignment(Pos.CENTER_RIGHT);
+
+        if (!esconderConteudo && evento.linkReuniao() != null) {
+            Button entrar = new Button("Entrar");
+            entrar.getStyleClass().add("botao-primario");
+            entrar.setGraphic(Icone.de(Icone.Simbolo.ABRIR_FORA, 14));
+            entrar.setOnAction(e -> {
+                abrirNoNavegador(evento.linkReuniao());
+                AvisosDeAgenda.confirmar(alerta);
+                fechar(janela);
+            });
+            botoes.getChildren().add(entrar);
+        }
+
+        Button adiar = new Button("Adiar " + minutosSnooze + " min");
+        adiar.getStyleClass().add("botao");
+        adiar.setOnAction(e -> {
+            AvisosDeAgenda.adiar(alerta, minutosSnooze);
+            fechar(janela);
+        });
+
+        Button ok = new Button("Confirmar");
+        // Com "Entrar" na fileira, o primário é ele: é o que se quer na hora
+        // da reunião. Sem link, o primário volta a ser o Confirmar.
+        ok.getStyleClass().add(botoes.getChildren().isEmpty() ? "botao-primario" : "botao");
+        ok.setOnAction(e -> {
+            AvisosDeAgenda.confirmar(alerta);
+            fechar(janela);
+        });
+
+        botoes.getChildren().addAll(adiar, ok);
+        exibir(janela, corpo, botoes);
+    }
+
+    private static void abrirNoNavegador(String link) {
+        new Thread(() -> {
+            try {
+                java.awt.Desktop.getDesktop().browse(java.net.URI.create(link));
+            } catch (Exception e) {
+                Log.aviso("Não foi possível abrir o link da reunião: " + e.getMessage());
+            }
+        }, "abrir-reuniao").start();
+    }
+
+    // -------------------------------------------------------------- apoio
 
     private static void fechar(Stage janela) {
         FadeTransition sumir = new FadeTransition(Duration.millis(140), janela.getScene().getRoot());

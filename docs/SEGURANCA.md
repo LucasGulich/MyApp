@@ -63,6 +63,8 @@ A proteção é **item a item**, escolhida por você ao criar o lembrete.
 | `titulo`, `descricao` de item comum | em claro | leitura rápida, sem custo |
 | datas, horários, recorrência, antecedências | **sempre em claro** | ver abaixo |
 | `dek_cifrada`, `salt` | cifrada / público | a raiz do esquema |
+| endereço secreto de agenda do Google | **sempre cifrado** | é uma credencial: dá leitura da agenda inteira |
+| cópia da agenda do Google (.ics) | em claro; cifrada se a agenda for protegida | mesmo critério do título |
 
 ### Por que as datas ficam em claro
 
@@ -118,6 +120,10 @@ exposto.
 - A DEK só existe como referência estática enquanto destrancado.
 - O log nunca recebe conteúdo de item protegido. `Lembrete.toString()` devolve
   só o identificador, justamente para não vazar título em uma mensagem de erro.
+- **Exceção consciente:** o endereço secreto das agendas do Google, depois de
+  decifrado no destrancar, fica na memória até o aplicativo fechar — senão a
+  agenda pararia de sincronizar a cada bloqueio. Nunca aparece na tela
+  trancada, nunca vai para o log, e no banco segue cifrado. Ver a decisão 43.
 
 ## O backup
 

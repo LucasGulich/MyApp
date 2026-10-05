@@ -12,9 +12,9 @@
 │  Bom dia!                                                    │
 │  Quinta-feira, 18 de setembro de 2026 • 3 compromissos       │
 │                                                              │
-│  🗓  HOJE ──────────────────────────────────────────────────  │
+│  🗓  AGENDA  ‹ Hoje ›  Quinta, 18/09   [Dia|Semana|Mês|Ano]   │
 │  ▍08:30  Backup do servidor                    (passou)      │
-│  ─ agora ──────────────────────────────────────────────────  │
+│  13:35 · próximo em 25 min ●───────────────────────────────  │
 │  ▍14:00  Reunião de alinhamento         [em 25 min]          │
 │  ▍17:30  Conferir a fila de integração                       │
 │                                                              │
@@ -31,24 +31,79 @@
 
 ## Hoje
 
-A agenda do dia sai dos **lembretes que já existem** — a tela não cria nem
-altera nada. E usa exatamente o mesmo cálculo de ocorrências que o agendador
-usa para disparar os avisos (`CalculadoraOcorrencias`), de modo que **o que
-aparece aqui é o que vai realmente tocar**.
+A agenda do dia sai dos **lembretes que já existem** e, desde a v1.10, das
+**agendas do Google conectadas** — ver [AGENDAS.md](AGENDAS.md). Evento do
+Google tem duração ("até 15:41"), um "G" à direita, o botão **Entrar** quando
+tem link de reunião, e só passa para "já foi" quando termina. Os de dia
+inteiro ficam em fichas no topo do painel.
+
+A tela não cria nem altera nada. Para os lembretes, usa exatamente o mesmo
+cálculo de ocorrências que o agendador usa para disparar os avisos
+(`CalculadoraOcorrencias`), de modo que **o que aparece aqui é o que vai
+realmente tocar**.
 
 Três detalhes que fazem diferença no uso:
 
 **O que já passou continua na lista**, apagado. Saber que a reunião das 9h
 passou é tão útil quanto saber da próxima — se some da tela, some da cabeça.
 
-**Uma linha marca o *agora***, separando o que passou do que ainda vem. O olho
-acha a posição do dia sem ler horário nenhum.
+**Uma linha fina e vermelha marca a hora atual**, separando o que passou do que
+ainda vem. Ela mostra o relógio e quanto falta para o próximo compromisso
+("13:35 · próximo em 25 min"), ou "nada mais hoje" no fim do dia. Parar o
+mouse sobre ela explica o que é.
+
+Ela aparece **sempre**: no topo, se nada passou ainda; no fim, se tudo já
+passou. Antes era a palavra "agora" e só aparecia entre dois compromissos —
+logo acima de uma reunião das 18h, parecia dizer que a reunião era agora.
+
+**A tela anda sozinha.** A cada minuto a linha se move, o que passou fica
+apagado, a contagem diminui e a saudação troca na hora certa — sem precisar
+mexer em nada. Os recados não são redesenhados, para não cortar um arrasto.
 
 **O que está para acontecer na próxima hora** ganha destaque e a contagem em
 minutos.
 
 Lembrete protegido com o aplicativo trancado aparece como `🔒 Lembrete
 protegido`: o horário é seu, o conteúdo não.
+
+## Dia, semana, mês e ano
+
+A agenda não mostra só hoje. Na barra do painel:
+
+```
+[‹] Hoje [›]   Outubro de 2026                  [Dia|Semana|Mês|Ano]
+```
+
+| Visão | O que mostra | ‹ e › andam |
+|---|---|---|
+| **Dia** | A lista com horário. Para hoje, com a linha da hora atual e os próximos dias; para outro dia, só ele | um dia |
+| **Semana** | Sete colunas, de segunda a domingo, com cada compromisso em miniatura | uma semana |
+| **Mês** | A folhinha: até 3 compromissos por dia e "+2 mais" | um mês |
+| **Ano** | Doze folhinhas pequenas; o dia com compromisso ganha cor, mais forte quanto mais cheio | um ano |
+
+- **Hoje** volta para o período de hoje, sem trocar a visão.
+- Clicar no **número de um dia** (semana, mês, ano) ou no "+2 mais" abre
+  aquele dia na visão Dia. Clicar no **nome do mês**, no ano, abre o mês.
+- O **⟳** no canto do painel sincroniza agora todas as agendas do Google. Só
+  aparece com alguma conectada; parar o mouse mostra quais são e quando foi a
+  última sincronização.
+- Clicar num **compromisso** abre o detalhe: o painel do evento, se veio do
+  Google; o cadastro do lembrete, se é do MyApp. Com o MyApp trancado, não
+  abre nada.
+- A visão escolhida fica guardada para a próxima abertura
+  (`visaoAgenda` no config.json). O período, não: o MyApp sempre abre em hoje.
+
+Na semana e no mês, duas regras para a grade não virar ruído:
+
+- lembrete **"a cada X minutos"** aparece **uma vez por dia**, na primeira
+  ocorrência, marcado com ↻. Um "beber água a cada 30 min" ocuparia 48 linhas
+  de cada dia;
+- evento de **dia inteiro** que dura vários dias (férias) aparece em **cada**
+  dia que ocupa, antes dos com horário.
+
+Dia e semana se redesenham a cada minuto, como a lista de hoje sempre fez.
+Mês e ano, só quando o dia vira: redesenhar o ano inteiro a cada minuto seria
+trabalho à toa.
 
 ## Recados
 
@@ -97,7 +152,8 @@ posição".
 | Arquivo | Papel |
 |---|---|
 | `InicioView` | A tela |
-| `InicioService` | Agenda do dia (leitura dos lembretes) e recados |
+| `InicioService` | Agenda do dia e por período (lembretes e agendas do Google) e recados |
+| `CalendarioGrade` | As grades de semana, mês e ano |
 | `Recado` / `CorRecado` / `RecadoDao` | O modelo do papel adesivo |
 | `PostIt` | O recado desenhado, com menu e cores |
 | `EditorRecado` | A janela de escrever |

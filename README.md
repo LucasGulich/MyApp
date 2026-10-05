@@ -4,7 +4,7 @@
 > **lembretes, notas com senhas, Kanban e recados**, num aplicativo só,
 > com senha mestra e criptografia.
 
-**Versão atual:** 1.9.1 · **Plataforma:** Windows 10 e 11
+**Versão atual:** 1.11.0 · **Plataforma:** Windows 10 e 11
 
 ---
 
@@ -32,9 +32,28 @@ para hoje?*
 
 | Recurso | Detalhe |
 |---|---|
-| Hoje | Os compromissos do dia, montados a partir dos lembretes, com uma linha marcando **agora** entre o que passou e o que vem |
+| Hoje | Os compromissos do dia — lembretes e eventos do Google Agenda —, com uma linha na **hora atual** entre o que passou e o que vem, e quanto falta para o próximo |
+| Dia, semana, mês e ano | A agenda em quatro visões, com ‹ Hoje › para andar; clicar num compromisso abre o detalhe |
 | Próximos dias | O que vem nos próximos três dias, logo abaixo |
 | Recados | Papéis adesivos em 8 cores que você cola na tela e arrasta para onde quiser; a cor muda pelo botão direito |
+
+### 📅 Agendas do Google
+
+A sua agenda do Google na tela Hoje, sem trocar de janela. Só leitura.
+
+| Recurso | Detalhe |
+|---|---|
+| Conectar | Pelo "endereço secreto no formato iCal" do Google, com botão **Testar** antes de salvar |
+| Sincronização | A cada 15 min, ao destrancar e no botão ⟳; sem rede, vale a última cópia |
+| Na tela Hoje | Horário de início e fim, local, "acontecendo", e **Entrar** na reunião do Meet, Teams ou Zoom |
+| Avisos | Escolhidos por agenda (na hora, 10 min, 1 h…), com **Entrar**, Adiar e Confirmar; som e dia inteiro opcionais |
+| Detalhes | Clicar no evento mostra a descrição inteira, "Abrir no Google Agenda" e "Criar lembrete a partir deste" |
+| Dia inteiro | Aniversários e feriados em fichas no topo, e não às 00:00 |
+| Filtros | Cancelados somem; convites recusados também, se você quiser |
+| Várias agendas | Trabalho, pessoal, feriados — cada uma com a sua cor |
+| Segurança | O endereço secreto vai sempre cifrado; a agenda pode ser marcada como protegida |
+
+Passo a passo em [docs/AGENDAS.md](docs/AGENDAS.md).
 
 ### 🔔 Lembretes
 
@@ -214,7 +233,7 @@ Todos estão na raiz e funcionam com duplo clique:
 | Script | Faz |
 |---|---|
 | `executar.cmd` | Compila o que mudou e abre o aplicativo |
-| `testar.cmd` | Roda a bateria de testes automatizados (104 testes) |
+| `testar.cmd` | Roda a bateria de testes automatizados (145 testes) |
 | `empacotar.cmd` | Gera o `.zip` pronto para entregar a outra pessoa |
 | `ambiente.cmd` | Acha o Java e o Maven — os outros o chamam; não precisa rodar |
 
@@ -340,6 +359,7 @@ lixeira; o item continua no banco e pode ser restaurado.
 | JavaFX 21 | Interface, montada em código (sem FXML) e estilizada em um CSS só |
 | SQLite (`sqlite-jdbc`) | Banco local, em arquivo |
 | Jackson | Leitura e gravação do `config.json` |
+| ical4j | Leitura das agendas do Google (formato .ics): recorrência, exceções e fuso |
 | JUnit 5 | Testes |
 | Maven + `jpackage` | Build e executável com Java embutido |
 
@@ -361,7 +381,7 @@ MyApp\
    │  ├─ modules\              inicio, lembretes, notas, kanban — um pacote por módulo
    │  └─ ui\                   componentes globais: botões, avisos, diálogos, busca…
    ├─ main\resources\css\app.css   todo o visual, com as cores declaradas uma vez
-   └─ test\java\br\com\myapp\      os 104 testes
+   └─ test\java\br\com\myapp\      os 145 testes
 ```
 
 ### Regras da casa
@@ -399,8 +419,9 @@ Como acrescentar um módulo novo: [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Como o aplicativo é montado e como acrescentar um módulo |
 | [docs/DESIGN.md](docs/DESIGN.md) | O padrão visual: cores, ícones, botões, avisos, diálogos, busca, estado vazio, atalhos |
 | [docs/SEGURANCA.md](docs/SEGURANCA.md) | A criptografia: o que protege e o que não protege |
-| [docs/DECISOES.md](docs/DECISOES.md) | Por que cada escolha técnica foi feita (41 decisões) |
+| [docs/DECISOES.md](docs/DECISOES.md) | Por que cada escolha técnica foi feita (46 decisões) |
 | [docs/INICIO.md](docs/INICIO.md) | A tela inicial: agenda do dia e recados |
+| [docs/AGENDAS.md](docs/AGENDAS.md) | Agendas do Google: conectar, sincronizar, o que aparece e por dentro |
 | [docs/LEMBRETES.md](docs/LEMBRETES.md) | O motor de agendamento por dentro |
 | [docs/NOTAS.md](docs/NOTAS.md) | Notas: tipos, segurança, gerador, destaque de sintaxe |
 | [docs/KANBAN.md](docs/KANBAN.md) | O quadro: colunas, cartões, arrastar, arquivar e prazo |

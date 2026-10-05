@@ -74,7 +74,7 @@ public class EditorCard {
         rolagem.setFitToWidth(true);
         rolagem.getStyleClass().add("rolagem-formulario");
         rolagem.setPrefViewportWidth(600);
-        rolagem.setPrefViewportHeight(560);
+        rolagem.setPrefViewportHeight(Dialogos.alturaQueCabe(560));
         dialogo.getDialogPane().setContent(rolagem);
 
         Dialogos.aplicarTema(dialogo.getDialogPane());

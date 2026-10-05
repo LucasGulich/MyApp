@@ -213,6 +213,7 @@ public final class Icone {
         SETA_BAIXO("M6 9l6 6 6-6"),
         SETA_CIMA("M18 15l-6-6-6 6"),
         SETA_DIREITA("M9 18l6-6-6-6"),
+        SETA_ESQUERDA("M15 18l-6-6 6-6"),
         ORDENAR("M3 6h18M6 12h12M10 18h4"),
         PONTO("M16 12a4 4 0 1 1 -8 0 4 4 0 0 1 8 0z", true);
 

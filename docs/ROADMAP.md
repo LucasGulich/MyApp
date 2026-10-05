@@ -51,6 +51,21 @@ Detalhes em [NOTAS.md](NOTAS.md).
 
 Detalhes em [INICIO.md](INICIO.md).
 
+## Entregue — v1.10 · Agendas do Google
+
+- [x] Agenda do Google na tela Hoje, pelo endereço secreto iCal
+- [x] Várias agendas, cada uma com a sua cor
+- [x] Sincronização a cada 15 min, com a última cópia valendo sem rede
+- [x] Botão "Entrar" para reuniões do Meet, Teams e Zoom
+- [x] Dia inteiro em fichas; cancelados e recusados filtrados
+- [x] Linha da hora atual na tela Hoje, andando a cada minuto
+
+- [x] Avisos dos eventos, com Entrar, Adiar e Confirmar (v1.11)
+- [x] Painel de detalhes do evento e "Criar lembrete a partir deste" (v1.11)
+- [x] Agenda em dia, semana, mês e ano (v1.11)
+
+Detalhes em [AGENDAS.md](AGENDAS.md) e [INICIO.md](INICIO.md).
+
 ## Entregue — v1.8.0 · Busca e cópia
 
 - [x] Busca sem acento em todo o aplicativo ("agua" acha "Água")
@@ -164,7 +179,7 @@ ao mesmo tempo.
 - **Sincronização entre máquinas** — casa e trabalho, pela pasta da nuvem
 - **Modo portátil de verdade** — pendrive com dados ao lado do executável (a base já existe via `myapp.home`)
 - **Widget de área de trabalho** — próximos compromissos sempre à vista
-- **Exportar para ICS** — levar a agenda para o Outlook ou o Google Agenda
+- **Exportar para ICS** — levar os lembretes para o Outlook ou o Google Agenda (o caminho inverso, Google → MyApp, entrou na v1.10)
 - **Plugins externos** — carregar módulos de um `.jar` solto, via `ServiceLoader`
 
 ## Como escolher o próximo

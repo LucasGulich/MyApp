@@ -1,5 +1,6 @@
 package br.com.myapp.core;
 
+import br.com.myapp.agendas.AvisosDeAgenda;
 import br.com.myapp.modules.lembretes.CalculadoraOcorrencias;
 import br.com.myapp.modules.lembretes.Lembrete;
 import br.com.myapp.modules.lembretes.LembreteDao;
@@ -43,22 +44,30 @@ public final class Scheduler {
 
         /** Texto pronto para o título do alerta. */
         public String resumoTempo() {
-            if (antecedencia == 0) {
-                return "Agora";
-            }
-            if (antecedencia < 60) {
-                return "Em " + antecedencia + " minutos";
-            }
-            if (antecedencia % 1440 == 0) {
-                int dias = antecedencia / 1440;
-                return dias == 1 ? "Amanhã" : "Em " + dias + " dias";
-            }
-            if (antecedencia % 60 == 0) {
-                int horas = antecedencia / 60;
-                return horas == 1 ? "Em 1 hora" : "Em " + horas + " horas";
-            }
-            return "Em " + (antecedencia / 60) + "h" + (antecedencia % 60) + "min";
+            return Scheduler.resumoTempo(antecedencia);
         }
+    }
+
+    /**
+     * "Agora", "Em 10 minutos", "Amanhã"… — o título de um aviso dado com
+     * tantos minutos de antecedência. Vale para lembrete e para evento de agenda.
+     */
+    public static String resumoTempo(int antecedencia) {
+        if (antecedencia == 0) {
+            return "Agora";
+        }
+        if (antecedencia < 60) {
+            return "Em " + antecedencia + " minutos";
+        }
+        if (antecedencia % 1440 == 0) {
+            int dias = antecedencia / 1440;
+            return dias == 1 ? "Amanhã" : "Em " + dias + " dias";
+        }
+        if (antecedencia % 60 == 0) {
+            int horas = antecedencia / 60;
+            return horas == 1 ? "Em 1 hora" : "Em " + horas + " horas";
+        }
+        return "Em " + (antecedencia / 60) + "h" + (antecedencia % 60) + "min";
     }
 
     private static ScheduledExecutorService executor;
@@ -109,6 +118,10 @@ public final class Scheduler {
                 verificar(lembrete, inicioDaJanela, agora);
             }
             processarAdiamentos();
+
+            // Os eventos das agendas do Google seguem regra própria (ver
+            // AvisosDeAgenda), mas saem nesta mesma batida de 20 s.
+            AvisosDeAgenda.varrer(agora);
 
             config.ultimaVarreduraMillis = paraMillis(agora);
             config.salvar();

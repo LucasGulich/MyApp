@@ -71,6 +71,7 @@ public class Secao extends VBox {
             Label apoio = new Label(explicacao);
             apoio.getStyleClass().add("secao-explicacao");
             apoio.setWrapText(true);
+            apoio.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
             cabecalho.getChildren().add(apoio);
         }
         return cabecalho;
@@ -118,11 +119,18 @@ public class Secao extends VBox {
         return l;
     }
 
-    /** Linha de explicação, em texto miúdo. */
+    /**
+     * Linha de explicação, em texto miúdo.
+     *
+     * A altura mínima igual à preferida não é enfeite: sem ela, dentro de um
+     * diálogo e com a escala do Windows acima de 100%, o JavaFX dava ao texto
+     * menos linhas do que ele precisa e cortava o fim com "...".
+     */
     public static Label dica(String texto) {
         Label l = new Label(texto);
         l.getStyleClass().add("secao-dica");
         l.setWrapText(true);
+        l.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         l.setMaxWidth(560);
         return l;
     }

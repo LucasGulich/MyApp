@@ -64,6 +64,7 @@
     -cor-perigo:           #FF5F6D;
     -cor-perigo-clara:     #FF8A94;
     -cor-perigo-fundo:     #341A1F;
+    -cor-linha-agora:      #FF3347;
     -cor-sucesso:          #3DD68C;
     -cor-sucesso-fundo:    #10291F;
     -cor-atencao:          #F5B547;
@@ -103,6 +104,7 @@
     -cor-perigo:           #D83A48;
     -cor-perigo-clara:     #B22A36;
     -cor-perigo-fundo:     #FDE9EB;
+    -cor-linha-agora:      #E8192C;
     -cor-sucesso:          #11865E;
     -cor-sucesso-fundo:    #E0F6EE;
     -cor-atencao:          #A9700A;
@@ -297,6 +299,16 @@ Label { -fx-text-fill: -cor-texto; }
 /* O item ativo ganha uma barrinha à esquerda e fundo suave. A barra é o que
    deixa claro "você está aqui" sem depender só da cor — funciona também para
    quem não distingue bem azul de cinza. */
+/* A assinatura no pé do menu: autor e versão, o mais discreto possível. */
+.assinatura-menu {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 10px;
+    -fx-padding: 8 0 0 14;
+    -fx-opacity: 0.8;
+}
+
+.menu-lateral.recolhido .assinatura-menu { -fx-padding: 8 0 0 0; -fx-font-size: 9px; }
+
 .item-menu {
     -fx-background-color: transparent;
     -fx-text-fill: -cor-texto-medio;
@@ -683,6 +695,13 @@ Label { -fx-text-fill: -cor-texto; }
 }
 
 .etiqueta-hoje .icone-forma { -fx-stroke: -cor-primaria-clara; }
+
+/* Reunião acontecendo agora. Verde, e não o azul do "em 10 min": a linha já
+   fica azul nesse estado, e uma etiqueta azul sobre ela sumia. */
+.etiqueta-andamento {
+    -fx-background-color: -cor-sucesso-fundo;
+    -fx-text-fill: -cor-sucesso;
+}
 
 /* ============================================ AVISOS (retorno de ação) === */
 
@@ -1111,20 +1130,294 @@ Label { -fx-text-fill: -cor-texto; }
     -fx-font-weight: bold;
 }
 
-/* A linha do "agora": o olho acha a posição do dia sem ler horário nenhum. */
-.divisor-agora { -fx-padding: 8 0 8 0; }
+/* ------------------------------------------ agenda: dia, semana, mês e ano */
 
-.divisor-agora-texto {
-    -fx-text-fill: -cor-perigo;
+.titulo-periodo {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* Dia | Semana | Mês | Ano: uma pílula só, com a escolhida destacada dentro
+   dela. Cada botão tem cantos próprios, em vez de bordas emendadas: o CSS do
+   JavaFX não tem :first-child nem :last-child para arredondar só as pontas. */
+.seletor-visao {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 3;
+    -fx-spacing: 2;
+}
+
+.seletor-visao .toggle-button,
+.seletor-visao .button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+    -fx-border-width: 0;
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 12px;
+    -fx-padding: 5 14 5 14;
+    -fx-cursor: hand;
+    -fx-effect: none;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.seletor-visao .button:hover,
+.seletor-visao .toggle-button:hover { -fx-background-color: -cor-superficie-topo; -fx-text-fill: -cor-texto; }
+
+/* As setas, um pouco mais estreitas que o texto. */
+.seletor-visao .button { -fx-padding: 5 9 5 9; }
+.seletor-visao .button .icone-forma { -fx-stroke: -cor-texto-medio; }
+.seletor-visao .button:hover .icone-forma { -fx-stroke: -cor-texto; }
+
+.seletor-visao .toggle-button:selected,
+.seletor-visao .toggle-button:selected:hover,
+.seletor-visao .toggle-button:selected:focused {
+    -fx-background-color: -cor-primaria;
+    -fx-background-insets: 0;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-effect: none;
+}
+
+.clicavel { -fx-cursor: hand; }
+
+/* Um compromisso em miniatura, na semana e no mês. */
+.item-calendario {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 5;
+    -fx-padding: 3 6 3 4;
+    -fx-cursor: hand;
+}
+
+.item-calendario:hover { -fx-background-color: -cor-superficie-topo; }
+.item-calendario.na-semana { -fx-padding: 6 8 6 5; }
+.item-calendario.passou { -fx-opacity: 0.45; }
+.item-calendario.dia-inteiro { -fx-background-color: -cor-primaria-fundo; }
+
+.item-calendario-faixa {
+    -fx-background-radius: 2;
+    -fx-min-width: 3;
+    -fx-pref-width: 3;
+    -fx-min-height: 14;
+}
+
+.item-calendario-texto {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 11px;
+}
+
+.item-calendario.na-semana .item-calendario-texto { -fx-font-size: 11.5px; }
+
+/* Semana: sete colunas, a de hoje marcada. */
+.semana-coluna {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 8 6 10 6;
+    -fx-min-height: 220;
+}
+
+.semana-coluna.hoje { -fx-border-color: -cor-primaria; }
+.semana-cabeca { -fx-padding: 0 0 6 0; -fx-cursor: hand; }
+
+.semana-dia-nome {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+}
+
+.semana-dia-numero {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30;
+    -fx-min-height: 30;
+    -fx-alignment: center;
+}
+
+.semana-dia-numero.hoje,
+.mes-dia-numero.hoje {
+    -fx-background-color: -cor-primaria;
+    -fx-background-radius: 15;
+    -fx-text-fill: white;
+}
+
+/* Mês: a folhinha. */
+.mes-dia-semana {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 2 0;
+}
+
+.mes-celula {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5;
+    -fx-min-height: 104;
+}
+
+.mes-celula.hoje { -fx-border-color: -cor-primaria; }
+.mes-celula.fora-do-mes { -fx-opacity: 0.4; }
+
+.mes-dia-numero {
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-min-width: 24;
+    -fx-min-height: 24;
+    -fx-alignment: center;
+    -fx-background-radius: 12;
+}
+
+.mes-dia-numero:hover { -fx-background-color: -cor-superficie-alta; }
+.mes-dia-numero.hoje:hover { -fx-background-color: -cor-primaria; }
+
+.mes-mais {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 0 4;
+}
+
+/* Ano: doze folhinhas; a cor do dia diz quanto movimento ele tem. */
+.ano-folhinha {
+    -fx-background-color: -cor-superficie;
+    -fx-border-color: -cor-borda;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.ano-mes-nome {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.ano-mes-nome:hover { -fx-text-fill: -cor-primaria-clara; }
+
+.ano-dia-semana {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 9.5px;
+    -fx-font-weight: bold;
+}
+
+.ano-dia {
+    -fx-text-fill: -cor-texto-medio;
+    -fx-font-size: 10.5px;
+    -fx-min-height: 20;
+    -fx-background-radius: 5;
+}
+
+.ano-dia:hover { -fx-background-color: -cor-superficie-alta; }
+.ano-dia-1 { -fx-background-color: -cor-primaria-fundo; -fx-text-fill: -cor-texto; }
+.ano-dia-2 { -fx-background-color: derive(-cor-primaria, -35%); -fx-text-fill: white; }
+.ano-dia-3 { -fx-background-color: -cor-primaria; -fx-text-fill: white; -fx-font-weight: bold; }
+
+.ano-dia.hoje {
+    -fx-border-color: -cor-linha-agora;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 5;
+    -fx-font-weight: bold;
+}
+
+/* Painel de detalhes do evento. */
+.titulo-evento {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* O término do evento de agenda, embaixo da hora: miúdo, para a coluna de
+   horários continuar alinhada. */
+.hora-compromisso-fim {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 10.5px;
+}
+
+/* O "G" do evento que veio do Google: na cor de destaque, para a origem se
+   ver de relance. */
+.selo-agenda {
+    -fx-text-fill: -cor-primaria-clara;
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-background-radius: 5;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: bold;
+    -fx-border-color: -cor-primaria;
+    -fx-border-radius: 5;
+    -fx-border-width: 1;
+    -fx-padding: 1 6 1 6;
+}
+
+/* "Entrar" na reunião: a ação principal da linha, preenchido como o botão
+   primário, mas no tamanho miúdo. */
+.botao-miudo.botao-entrar {
+    -fx-background-color: -cor-primaria;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.botao-miudo.botao-entrar .icone-forma { -fx-stroke: white; }
+.botao-miudo.botao-entrar:hover { -fx-background-color: derive(-cor-primaria, -12%); -fx-text-fill: white; }
+.botao-miudo.botao-entrar:hover .icone-forma { -fx-stroke: white; }
+
+/* Aniversários, feriados e férias: fichas no topo do painel, porque numa
+   lista por horário iriam todos para 00:00. */
+.faixa-dia-inteiro { -fx-padding: 0 0 4 0; }
+
+.dia-inteiro-rotulo {
+    -fx-text-fill: -cor-texto-fraco;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
 }
 
+/* A cor da agenda vem na borda, posta pelo código. */
+.ficha-dia-inteiro {
+    -fx-background-color: -cor-superficie;
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 12px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-padding: 4 12 4 12;
+}
+
+/* A linha do "agora": o olho acha a posição do dia sem ler horário nenhum. */
+.divisor-agora { -fx-padding: 6 0 6 0; }
+
+/* A hora atual, no vermelho vivo da linha: é o que diz o que a linha é. */
+.divisor-agora-hora {
+    -fx-text-fill: -cor-linha-agora;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.divisor-agora-texto {
+    -fx-text-fill: -cor-texto-fraco;
+    -fx-font-size: 11px;
+}
+
+.divisor-agora-ponto { -fx-fill: -cor-linha-agora; }
+
+/* Fina de verdade: sem a altura máxima, o HBox esticava a linha até a altura
+   do texto ao lado, e ela virava uma faixa. */
 .divisor-agora-linha {
-    -fx-background-color: -cor-perigo;
+    -fx-background-color: -cor-linha-agora;
     -fx-min-height: 1;
     -fx-pref-height: 1;
-    -fx-opacity: 0.45;
+    -fx-max-height: 1;
 }
 
 /* ========================================================== RECADOS ===== */
@@ -1309,6 +1602,7 @@ Label { -fx-text-fill: -cor-texto; }
 }
 
 .botao-icone-miudo:hover { -fx-background-color: -cor-primaria; }
+.botao-icone-miudo:hover .icone-forma { -fx-stroke: white; }
 .botao-icone-miudo.botao-icone-perigo:hover { -fx-background-color: -cor-perigo; }
 
 .alca-coluna { -fx-cursor: open-hand; }

@@ -106,7 +106,7 @@ public class EditorNota {
         rolagem.setFitToWidth(true);
         rolagem.getStyleClass().add("rolagem-formulario");
         rolagem.setPrefViewportWidth(660);
-        rolagem.setPrefViewportHeight(640);
+        rolagem.setPrefViewportHeight(Dialogos.alturaQueCabe(640));
         dialogo.getDialogPane().setContent(rolagem);
 
         Dialogos.aplicarTema(dialogo.getDialogPane());

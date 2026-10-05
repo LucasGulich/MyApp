@@ -769,6 +769,130 @@ erro, porque o aviso de "salvo" aparece do mesmo jeito.
 
 ---
 
+## 42. Ler a agenda com a ical4j, e não com um leitor próprio
+
+**Contexto:** a agenda do Google chega no formato iCalendar (.ics). O projeto
+costuma preferir código próprio a dependência — o destaque de sintaxe, por
+exemplo, é regex escrito aqui (decisão 20).
+
+**Decisão:** usar a **ical4j**, a biblioteca de referência do formato em
+Java, sem o Groovy e o jparsec que ela puxa.
+
+**Por quê:** ler o arquivo é a parte fácil. O difícil é o que vem depois —
+recorrência ("toda segunda e quarta, até dezembro"), exceções, ocorrências
+remarcadas, fuso e horário de verão. É exatamente onde sistemas de agenda
+erram, e o erro aparece como reunião no horário errado, que é o pior defeito
+possível para esta tela. A ical4j trata disso há quase 20 anos; um leitor
+próprio levaria semanas para chegar perto, e os casos raros só apareceriam
+em produção.
+
+**O custo:** cerca de 3 MB no pacote (a biblioteca e quatro dependências
+pequenas). O Groovy e o jparsec servem apenas aos filtros e construtores em
+linguagem própria da biblioteca, que o MyApp não usa — excluídos no `pom.xml`,
+pouparam mais 7 MB.
+
+**Duas precauções:**
+
+- `ical4j.properties` desliga a atualização de fusos pela internet: a única
+  conexão do MyApp com o Google é a sincronização, feita por ele mesmo;
+- o que a biblioteca não faz sozinha — tirar da série a ocorrência remarcada,
+  cancelados, recusados — fica em `ArquivoIcs`, coberto por testes com o
+  formato real do Google.
+
+---
+
+## 43. O endereço secreto fica na memória depois de trancar
+
+**Contexto:** o endereço secreto é uma credencial — dá leitura da agenda
+inteira — e vai cifrado para o banco, como a senha de uma credencial. Para
+decifrar é preciso a chave, que só existe com o aplicativo destrancado, e
+trancar a descarta da memória.
+
+**O problema:** com a regra pura, a agenda só sincronizaria destrancada. O
+bloqueio por inatividade conta o tempo sem mexer **no MyApp** — quem trabalha
+em outras janelas o tem trancado quase o dia inteiro. A agenda ficaria horas
+parada, e a reunião marcada às 10h para as 14h não apareceria.
+
+**Decisão:** ao destrancar, os endereços são decifrados e **ficam na memória
+até o aplicativo fechar**, mesmo depois de trancar.
+
+**Por que é aceitável:** o que a trava protege é o que aparece **na tela** e o
+que está **no disco**. Os dois continuam protegidos — o link nunca aparece
+trancado, e no banco segue cifrado. O que muda é um texto na memória do
+processo, que só alguém com acesso à máquina destrancada do Windows leria, e
+esse alguém já teria a agenda aberta no navegador ao lado.
+
+**Consequência prática:** recém-aberto, antes do primeiro destrancar, o MyApp
+não sabe o endereço e usa a cópia guardada. Ver docs/AGENDAS.md.
+
+---
+
+## 44. A agenda guarda o arquivo inteiro, e não uma tabela de eventos
+
+**Alternativa:** uma tabela `evento` com uma linha por evento, atualizada a
+cada sincronização.
+
+**Decisão:** a tabela `agenda` guarda o .ics inteiro na coluna `conteudo`, e
+os eventos são calculados em memória.
+
+**Por quê:** sincronizar uma tabela de eventos exige **apagar** os que sumiram
+do Google — e neste aplicativo nada se apaga (decisão 15). Marcar como
+excluído o que o Google excluiu encheria o banco de lixo a cada 15 minutos.
+Guardando o arquivo, a cópia é sempre o retrato fiel do último envio, a
+sincronização é uma troca de uma coluna só, e uma falha no meio nunca deixa a
+agenda pela metade.
+
+**O custo:** recalcular as ocorrências a partir do arquivo. Resolvido com um
+cache por agenda, refeito quando o dia vira ou quando chega conteúdo novo.
+
+---
+
+## 45. O aviso de evento do Google pergunta "o que já passou da hora?"
+
+**Contexto:** o agendador dos lembretes pergunta, a cada 20 s, "o que devia
+ter avisado desde a última varredura?" (decisão 3). Para lembrete funciona,
+porque o lembrete existe desde antes da hora do aviso.
+
+**O problema:** evento do Google chega pela sincronização, a cada 15 min. A
+reunião das 14h marcada às 13h55, com aviso de 10 min, só é conhecida às
+13h57 — e a hora do aviso (13h50) já ficou para trás da última varredura.
+Pela regra dos lembretes, esse aviso nunca sairia.
+
+**Decisão:** para eventos, a pergunta é **"que aviso já passou da hora e
+ainda não saiu?"**, com três travas: evento que já terminou não avisa; nada
+de antes de a agenda ser conectada; nada além dos dias de recuperação das
+configurações.
+
+**Tabela própria (`disparo_agenda`):** a `disparo` dos lembretes tem chave
+estrangeira para `lembrete`, e evento não é lembrete. O evento é identificado
+pelo uid do Google mais o horário da ocorrência, porque o uid se repete em
+todas as ocorrências de uma série. O adiamento mora na própria linha — um
+aviso de evento é adiado uma vez por vez, e uma tabela à parte não traria
+nada.
+
+---
+
+## 46. Na semana e no mês, "a cada X minutos" aparece uma vez por dia
+
+**Contexto:** a lista do dia mostra cada ocorrência de um lembrete. Numa
+grade de sete colunas, um "beber água a cada 30 min" seriam 48 cartões por
+dia — a semana inteira tomada por um lembrete só.
+
+**Decisão:** em `InicioService.porDia`, lembrete do tipo intervalo entra uma
+vez por dia, na primeira ocorrência, marcado com ↻. O resto da série aparece
+ao abrir o dia.
+
+**Como, sem custo:** pedir ao cálculo de ocorrências só o pedaço do dia em
+que a primeira pode cair (do começo do dia, ou do início do lembrete, até um
+intervalo depois). Gerar as 1.440 ocorrências de um "a cada minuto" para
+jogar fora 1.439 deixaria a visão de ano pesada.
+
+**Junto:** evento de dia inteiro que dura vários dias aparece em cada dia que
+ocupa, antes dos com horário. Na lista do dia ele já era ficha no topo; na
+grade, sem isso, as férias apareceriam só no primeiro dia.
+
+---
+
 ## Registro de mudanças deste documento
 
 | Data | Decisão acrescentada |
@@ -784,3 +908,5 @@ erro, porque o aviso de "salvo" aparece do mesmo jeito.
 | 22/09/2026 | 38 e 39 — seleção sobre o código colorido e busca sem acento (v1.8) |
 | 23/09/2026 | 40 — o botão do estado vazio é o comum (v1.8.1) |
 | 24/09/2026 | 41 — Ctrl+S ligado formulário a formulário (v1.9) |
+| 05/10/2026 | 42 a 44 — ical4j, endereço secreto na memória e agenda sem tabela de eventos (v1.10) |
+| 05/10/2026 | 45 e 46 — aviso de evento "o que já passou da hora" e intervalo uma vez por dia na grade (v1.11) |
