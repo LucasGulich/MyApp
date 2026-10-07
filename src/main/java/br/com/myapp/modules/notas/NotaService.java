@@ -83,9 +83,12 @@ public class NotaService {
         EventBus.publicar(new CategoriasMudaram());
     }
 
-    /** Cria as categorias iniciais na primeira abertura do módulo. */
-    public void criarCategoriasIniciaisSeVazio() {
-        if (!categoriaDao.listar().isEmpty()) {
+    /**
+     * Cria as categorias iniciais na primeira abertura do módulo — só nela.
+     * Quem excluiu todas de propósito não as vê voltar (como no Kanban).
+     */
+    public void criarCategoriasIniciaisNaPrimeiraVez() {
+        if (categoriaDao.jaTeveCategoria()) {
             return;
         }
         criarCategoria("Clientes", "#4C8DFF", "empresa");

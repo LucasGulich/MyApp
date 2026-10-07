@@ -933,7 +933,9 @@ Label { -fx-text-fill: -cor-texto; }
 .formulario { -fx-padding: 8 20 20 8; -fx-background-color: transparent; }
 .rolagem-formulario, .rolagem-formulario > .viewport { -fx-background-color: transparent; }
 
-.secao {
+/* O vazio de uma tela inteira (EstadoVazio.emCartao) usa a mesma superfície
+   do cartão da Secao, com o respiro do vazio por dentro. */
+.secao, .estado-vazio-cartao {
     -fx-background-color: -cor-superficie;
     -fx-background-radius: 14;
     -fx-border-color: -cor-borda;
@@ -942,6 +944,8 @@ Label { -fx-text-fill: -cor-texto; }
     -fx-padding: 18 20 20 20;
     -fx-effect: dropshadow(gaussian, -cor-sombra, 5, 0, 0, 1);
 }
+
+.estado-vazio.estado-vazio-cartao { -fx-padding: 44 24 44 24; }
 
 .secao-titulo {
     -fx-text-fill: -cor-primaria-clara;

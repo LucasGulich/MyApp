@@ -45,6 +45,12 @@ preservado, e os campos do tipo novo nascem vazios.
 Três colunas, como nos aplicativos de nota que todo mundo já conhece. Não há
 motivo para inventar outro formato.
 
+Um clique no cartão abre a nota na coluna da direita; dois cliques abrem
+para editar. O **✕** ao lado do título (ou **Esc**) fecha a nota e a coluna
+volta ao "Escolha uma nota", como na hora em que a tela abriu.
+Esse vazio, como o da lista do meio, fica num cartão que ocupa a coluna
+inteira, centralizado (`EstadoVazio.emCartao()`, ver `DESIGN.md`).
+
 ## Segurança
 
 Reaproveita integralmente a criptografia do aplicativo — nenhuma linha nova de
@@ -92,6 +98,8 @@ tocado.
 pedir que alguém cole um emoji é pior do que oferecer os doze que fazem
 sentido). Na primeira abertura, cinco já vêm prontas: Clientes, Servidores,
 Acessos internos, Comandos e SQL, Pessoal.
+Só na primeira: quem exclui todas não as vê voltar ao reabrir — a mesma
+regra das colunas do Kanban.
 
 Uma nota fica em **uma** categoria. Foi a escolha de organização única do
 módulo: etiquetas chegaram a existir na v1.2 e foram retiradas na v1.4, porque
@@ -184,6 +192,10 @@ Ctrl+A seleciona tudo, Ctrl+C copia, e o botão direito oferece "Copiar" e
 "Selecionar tudo". Quem faz isso é `ui.TextoSelecionavel`, que desenha a
 seleção por trás do texto colorido. O motivo de não trocar por um `TextArea`
 está na decisão 38 de `DECISOES.md`.
+
+> Até a v1.11.1, o Ctrl+C não funcionava: o clique no bloco chegava também
+> à rolagem da coluna (`ScrollPane`), que pegava o foco do teclado para si
+> logo depois. Agora o bloco consome o clique, e o foco fica com ele.
 
 ## O modelo de dados
 

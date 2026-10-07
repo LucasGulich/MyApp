@@ -2,8 +2,13 @@ package br.com.myapp.ui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
@@ -34,10 +39,20 @@ import javafx.scene.text.TextAlignment;
  * <p>Ocupa toda a largura que receber e centraliza o conteúdo dentro dela.
  * Não serve colocá-lo dentro de um {@code FlowPane}, que dá a cada filho só o
  * tamanho preferido e o encosta à esquerda.
+ *
+ * <p><b>Dois usos, uma regra.</b> Dentro de um cartão que já existe (as
+ * {@code Secao} da tela inicial), vai solto. Ocupando a área de uma tela ou
+ * de uma coluna, vai com {@link #emCartao()}: vira ele mesmo o cartão e
+ * estica até o fim da área — o padrão de toda tela nova.
  */
 public class EstadoVazio extends VBox {
 
     private final Label explicacao = new Label();
+
+    /** A rolagem que {@link #emCartao()} esticou, e como ela estava antes. */
+    private ScrollPane rolagem;
+    private boolean larguraAntes;
+    private boolean alturaAntes;
 
     public EstadoVazio(Icone.Simbolo simbolo, String titulo) {
         getStyleClass().add("estado-vazio");
@@ -50,12 +65,16 @@ public class EstadoVazio extends VBox {
         Label rotulo = new Label(titulo);
         rotulo.getStyleClass().add("estado-vazio-titulo");
         rotulo.setWrapText(true);
+        // Com a escala do Windows acima de 100%, o rótulo com quebra encolhia
+        // e cortava em "..." em vez de descer para a linha de baixo.
+        rotulo.setMinHeight(Region.USE_PREF_SIZE);
         rotulo.setTextAlignment(TextAlignment.CENTER);
         rotulo.setAlignment(Pos.CENTER);
         VBox.setMargin(rotulo, new Insets(16, 0, 0, 0));
 
         explicacao.getStyleClass().add("estado-vazio-explicacao");
         explicacao.setWrapText(true);
+        explicacao.setMinHeight(Region.USE_PREF_SIZE);
         // Sem isto, a frase que cabe numa linha só encosta à esquerda da
         // caixa: o alinhamento de texto só vale a partir da segunda linha.
         explicacao.setAlignment(Pos.CENTER);
@@ -74,6 +93,54 @@ public class EstadoVazio extends VBox {
         explicacao.setVisible(true);
         explicacao.setManaged(true);
         return this;
+    }
+
+    /**
+     * O vazio de uma tela ou coluna inteira: num cartão, como os da tela
+     * inicial, ocupando toda a área com o conteúdo no centro.
+     *
+     * <p>As listas ficam dentro de uma rolagem, que dá ao conteúdo só a altura
+     * que ele pede — o cartão terminaria logo abaixo do botão. Por isso, enquanto
+     * o vazio está na tela, a rolagem em volta passa a esticar o conteúdo até as
+     * bordas; quando ele sai (chegou o primeiro item, trocou de tela), ela volta
+     * a ser como era, e uma lista longa continua rolando. Quem usa não precisa
+     * mexer na rolagem.
+     */
+    public EstadoVazio emCartao() {
+        getStyleClass().add("estado-vazio-cartao");
+        setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(this, Priority.ALWAYS);
+        HBox.setHgrow(this, Priority.ALWAYS);
+
+        sceneProperty().addListener((obs, antes, agora) -> {
+            if (agora != null) {
+                esticarRolagem();
+            } else {
+                devolverRolagem();
+            }
+        });
+        return this;
+    }
+
+    private void esticarRolagem() {
+        for (Parent p = getParent(); p != null; p = p.getParent()) {
+            if (p instanceof ScrollPane encontrada) {
+                rolagem = encontrada;
+                larguraAntes = encontrada.isFitToWidth();
+                alturaAntes = encontrada.isFitToHeight();
+                encontrada.setFitToWidth(true);
+                encontrada.setFitToHeight(true);
+                return;
+            }
+        }
+    }
+
+    private void devolverRolagem() {
+        if (rolagem != null) {
+            rolagem.setFitToWidth(larguraAntes);
+            rolagem.setFitToHeight(alturaAntes);
+            rolagem = null;
+        }
     }
 
     /** O botão que resolve o vazio — em geral, criar o primeiro item. */

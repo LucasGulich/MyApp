@@ -160,9 +160,15 @@ public class KanbanService {
         EventBus.publicar(new QuadroMudou());
     }
 
-    /** Cria as colunas de exemplo na primeira abertura do módulo. */
-    public void criarColunasIniciaisSeVazio() {
-        if (!dao.quadro().isEmpty()) {
+    /**
+     * Cria as colunas de exemplo na primeira abertura do módulo — só nela.
+     *
+     * <p>Antes a pergunta era "o quadro está vazio?", e quem excluía todas as
+     * colunas de propósito as via voltar na abertura seguinte. Quadro vazio
+     * por escolha é um estado legítimo, com o seu próprio {@code EstadoVazio}.
+     */
+    public void criarColunasIniciaisNaPrimeiraVez() {
+        if (dao.jaTeveColuna()) {
             return;
         }
         criar("A fazer", CorKanban.AZUL);

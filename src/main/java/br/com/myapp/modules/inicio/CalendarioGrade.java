@@ -30,8 +30,8 @@ import java.util.function.Consumer;
  *
  * Só desenho: os dados chegam prontos, separados por dia
  * ({@link InicioService#porDia}), e cada clique é devolvido a quem montou a
- * grade pelas {@link Acoes}. A semana começa na segunda, como no calendário
- * de trabalho.
+ * grade pelas {@link Acoes}. A semana começa no domingo, como no calendário
+ * do Windows.
  *
  * <pre>
  *   Semana: 7 colunas, um cartãozinho por compromisso
@@ -59,20 +59,20 @@ final class CalendarioGrade {
     private CalendarioGrade() {
     }
 
-    /** A segunda-feira da semana de um dia. */
+    /** O domingo da semana de um dia — a semana começa no domingo, como no calendário do Windows. */
     static LocalDate inicioDaSemana(LocalDate dia) {
-        return dia.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return dia.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
     }
 
     // ---------------------------------------------------------------- semana
 
     static Node semana(LocalDate qualquerDia, Map<LocalDate, List<InicioService.CompromissoDoDia>> porDia,
                        Acoes acoes) {
-        LocalDate segunda = inicioDaSemana(qualquerDia);
+        LocalDate domingo = inicioDaSemana(qualquerDia);
         GridPane grade = gradeDeSeteColunas(8);
 
         for (int i = 0; i < 7; i++) {
-            LocalDate dia = segunda.plusDays(i);
+            LocalDate dia = domingo.plusDays(i);
 
             Label nome = new Label(dia.getDayOfWeek().getDisplayName(TextStyle.SHORT, PT_BR)
                     .replace(".", "").toUpperCase());
@@ -107,7 +107,7 @@ final class CalendarioGrade {
                     Acoes acoes) {
         YearMonth mes = YearMonth.from(qualquerDia);
         LocalDate primeiro = inicioDaSemana(mes.atDay(1));
-        LocalDate ultimo = mes.atEndOfMonth().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        LocalDate ultimo = mes.atEndOfMonth().with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
 
         GridPane grade = gradeDeSeteColunas(6);
         cabecalhoDosDias(grade, false);
@@ -280,10 +280,10 @@ final class CalendarioGrade {
         return grade;
     }
 
-    /** SEG TER QUA… na primeira linha; na folhinha do ano, só a inicial. */
+    /** DOM SEG TER… na primeira linha; na folhinha do ano, só a inicial. */
     private static void cabecalhoDosDias(GridPane grade, boolean soInicial) {
         for (int i = 0; i < 7; i++) {
-            String nome = DayOfWeek.of(i + 1).getDisplayName(TextStyle.SHORT, PT_BR).replace(".", "").toUpperCase();
+            String nome = DayOfWeek.SUNDAY.plus(i).getDisplayName(TextStyle.SHORT, PT_BR).replace(".", "").toUpperCase();
             Label rotulo = new Label(soInicial ? nome.substring(0, 1) : nome);
             rotulo.getStyleClass().add(soInicial ? "ano-dia-semana" : "mes-dia-semana");
             rotulo.setMaxWidth(Double.MAX_VALUE);

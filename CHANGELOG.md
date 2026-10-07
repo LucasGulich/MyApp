@@ -7,6 +7,44 @@ e as versões seguem [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.11.2] — 2026-10-06
+
+### Adicionado
+
+- **Fechar a nota aberta.** Um ✕ ao lado do título, ou Esc, devolve a coluna
+  da direita ao "Escolha uma nota" de quando a tela abriu.
+
+### Alterado
+
+- **Telas vazias no padrão da tela inicial.** Lembretes, Notas (lista e
+  "Escolha uma nota") e Kanban sem colunas mostram o vazio num cartão que
+  ocupa a área, com o conteúdo centralizado na altura e na largura. Virou
+  padrão do componente: `EstadoVazio.emCartao()`, que também cuida da
+  rolagem em volta. Ver `DESIGN.md`.
+
+### Corrigido
+
+- **Ctrl+C no trecho de código.** Selecionar parte do código e apertar
+  Ctrl+C não copiava (só o botão direito funcionava): a rolagem da coluna
+  pegava o foco do teclado logo depois do clique.
+- **Telas vazias cortadas em "...".** Com a escala do Windows acima de 100%,
+  o título e a explicação do `EstadoVazio` encolhiam em vez de quebrar a linha.
+- **Kanban e Notas recriavam os exemplos.** Excluir todas as colunas do
+  Kanban (ou todas as categorias das Notas) e reabrir o MyApp trazia de volta
+  as de exemplo. Agora elas nascem só na primeira abertura: a regra deixou de
+  ser "está vazio?" e passou a ser "já existiu alguma?".
+- **Faixa branca na confirmação de excluir coluna do Kanban.** Com mensagem
+  curta, a janela do diálogo ficava com a largura mínima (400) e o conteúdo
+  com menos; a sobra aparecia branca à direita. A largura mínima passou da
+  janela para o conteúdo, e vale para todas as confirmações.
+
+## [1.11.1] — 2026-10-06
+
+### Alterado
+
+- **A semana começa no domingo**, como no calendário do Windows. Vale para
+  as visões Semana, Mês e Ano: as colunas vão de domingo a sábado.
+
 ## [1.11.0] — 2026-10-05
 
 ### Adicionado

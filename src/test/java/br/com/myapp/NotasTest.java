@@ -396,13 +396,25 @@ class NotasTest {
     @Test
     @DisplayName("As categorias iniciais são criadas uma única vez")
     void categoriasIniciais() {
-        servico.criarCategoriasIniciaisSeVazio();
+        servico.criarCategoriasIniciaisNaPrimeiraVez();
         int depoisDaPrimeira = servico.listarCategorias().size();
         assertTrue(depoisDaPrimeira > 0, "deveria ter criado as categorias iniciais");
 
-        servico.criarCategoriasIniciaisSeVazio();
+        servico.criarCategoriasIniciaisNaPrimeiraVez();
         assertEquals(depoisDaPrimeira, servico.listarCategorias().size(),
                 "a segunda chamada nao pode duplicar");
+    }
+
+    @Test
+    @DisplayName("Quem exclui todas as categorias não as vê voltar ao reabrir")
+    void categoriasExcluidasNaoVoltam() {
+        servico.criarCategoriasIniciaisNaPrimeiraVez();
+        servico.listarCategorias().forEach(c -> servico.excluirCategoria(c.getId()));
+        assertTrue(servico.listarCategorias().isEmpty());
+
+        servico.criarCategoriasIniciaisNaPrimeiraVez();   // a tela abrindo de novo
+        assertTrue(servico.listarCategorias().isEmpty(),
+                "sem categorias foi escolha do usuário, não primeira abertura");
     }
 
     // ------------------------------------------------------ gerador de senha

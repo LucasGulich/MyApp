@@ -199,6 +199,21 @@ public class CategoriaDao {
         }
     }
 
+    /**
+     * Se já existiu alguma categoria, mesmo excluída. Como a exclusão é
+     * lógica, nenhuma linha quer dizer "as Notas nunca foram abertas".
+     */
+    public boolean jaTeveCategoria() {
+        try (PreparedStatement ps = Database.conexao()
+                .prepareStatement("SELECT 1 FROM categoria LIMIT 1");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            // Na dúvida, não cria nada: exemplo a mais é pior que nenhum.
+            return true;
+        }
+    }
+
     /** Maior ordem em uso, para posicionar uma categoria nova no fim. */
     public int proximaOrdem() {
         try (PreparedStatement ps = Database.conexao()

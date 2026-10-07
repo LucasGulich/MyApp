@@ -22,6 +22,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -106,13 +108,22 @@ public class NotasView extends BorderPane {
     public NotasView() {
         getStyleClass().add("conteudo");
 
-        servico.criarCategoriasIniciaisSeVazio();
+        servico.criarCategoriasIniciaisNaPrimeiraVez();
         setCenter(montarTresColunas());
 
         EventBus.ouvir(NotaService.ListaMudou.class,
                 e -> Platform.runLater(this::recarregarNotas));
         EventBus.ouvir(NotaService.CategoriasMudaram.class,
                 e -> Platform.runLater(this::recarregarCategorias));
+
+        // Esc fecha a nota aberta. Quem usa o Esc antes (a busca limpando o
+        // texto, o código desfazendo a seleção) consome o evento e ele não chega aqui.
+        addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.ESCAPE && notaAberta != null) {
+                fecharDetalhe();
+                e.consume();
+            }
+        });
 
         recarregar();
     }
@@ -496,14 +507,17 @@ public class NotasView extends BorderPane {
         if (!semNada) {
             return new EstadoVazio(Icone.Simbolo.BUSCAR, "Nada corresponde à busca.")
                     .comExplicacao("A busca olha o título, o texto e os campos comuns — "
-                            + "nunca as senhas.");
+                            + "nunca as senhas.")
+                    .emCartao();
         }
         if (FILTRO_LIXEIRA.equals(filtroAtual)) {
             return new EstadoVazio(Icone.Simbolo.EXCLUIR, "A lixeira está vazia.")
-                    .comExplicacao("O que você excluir vem para cá e pode ser restaurado.");
+                    .comExplicacao("O que você excluir vem para cá e pode ser restaurado.")
+                    .emCartao();
         }
         return new EstadoVazio(Icone.Simbolo.NOTA, "Nenhuma nota aqui ainda.")
-                .comAcao("Criar a primeira nota", () -> abrirEditor(null));
+                .comAcao("Criar a primeira nota", () -> abrirEditor(null))
+                .emCartao();
     }
 
     // -------------------------------------------------- coluna 3: detalhe
@@ -524,7 +538,15 @@ public class NotasView extends BorderPane {
 
         painelDetalhe.getChildren().add(
                 new EstadoVazio(Icone.Simbolo.NOTA, "Escolha uma nota para ver o conteúdo.")
-                        .comExplicacao("Um clique abre aqui; dois cliques abrem para editar."));
+                        .comExplicacao("Um clique abre aqui; dois cliques abrem para editar.")
+                        .emCartao());
+    }
+
+    /** Fecha a nota aberta: a coluna volta ao "escolha uma nota" e o cartão perde o destaque. */
+    private void fecharDetalhe() {
+        notaAberta = null;
+        mostrarNadaSelecionado();
+        recarregarNotas();
     }
 
     private void abrirDetalhe(Nota nota) {
@@ -540,7 +562,17 @@ public class NotasView extends BorderPane {
                 + "  •  alterada em " + DATA_HORA.format(nota.getAtualizadoEm()));
         subtitulo.getStyleClass().add("subtitulo");
 
-        painelDetalhe.getChildren().addAll(titulo, subtitulo, montarAcoes(nota));
+        // O X devolve a coluna ao estado de quando a tela abriu, sem nota.
+        Button fechar = Botoes.icone(Icone.Simbolo.FECHAR, "Fechar a nota (Esc)");
+        fechar.setOnAction(e -> fecharDetalhe());
+        HBox.setHgrow(titulo, Priority.ALWAYS);
+        titulo.setMaxWidth(Double.MAX_VALUE);
+        titulo.setMinWidth(0);
+        titulo.setMinHeight(Region.USE_PREF_SIZE);
+        HBox linhaTitulo = new HBox(8, titulo, fechar);
+        linhaTitulo.setAlignment(Pos.TOP_LEFT);
+
+        painelDetalhe.getChildren().addAll(linhaTitulo, subtitulo, montarAcoes(nota));
 
         // ---------- campos ----------
         if (!nota.getCampos().isEmpty()) {

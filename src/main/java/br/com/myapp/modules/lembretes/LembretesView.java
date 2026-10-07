@@ -320,16 +320,19 @@ public class LembretesView extends BorderPane {
     private EstadoVazio montarEstadoVazio(boolean nadaCadastrado) {
         if ("Lixeira".equals(filtro.getValue())) {
             return new EstadoVazio(Icone.Simbolo.EXCLUIR, "A lixeira está vazia.")
-                    .comExplicacao("O que você excluir vem para cá e pode ser restaurado.");
+                    .comExplicacao("O que você excluir vem para cá e pode ser restaurado.")
+                    .emCartao();
         }
         if (!nadaCadastrado) {
             return new EstadoVazio(Icone.Simbolo.BUSCAR, "Nenhum lembrete corresponde ao filtro.")
-                    .comExplicacao("Tente outra palavra na busca, ou volte o filtro para \"Todos\".");
+                    .comExplicacao("Tente outra palavra na busca, ou volte o filtro para \"Todos\".")
+                    .emCartao();
         }
         return new EstadoVazio(Icone.Simbolo.LEMBRETE, "Você ainda não tem lembretes.")
                 .comExplicacao("Um lembrete avisa na hora marcada — uma vez só ou repetindo, "
                         + "com quantos avisos antes você quiser.")
-                .comAcao("Criar o primeiro lembrete", () -> abrirEditor(null));
+                .comAcao("Criar o primeiro lembrete", () -> abrirEditor(null))
+                .emCartao();
     }
 
     // ----------------------------------------------------------- textos úteis

@@ -4,7 +4,7 @@
 > **lembretes, notas com senhas, Kanban e recados**, num aplicativo só,
 > com senha mestra e criptografia.
 
-**Versão atual:** 1.11.0 · **Plataforma:** Windows 10 e 11
+**Versão atual:** 1.11.2 · **Plataforma:** Windows 10 e 11
 
 ---
 
@@ -233,7 +233,7 @@ Todos estão na raiz e funcionam com duplo clique:
 | Script | Faz |
 |---|---|
 | `executar.cmd` | Compila o que mudou e abre o aplicativo |
-| `testar.cmd` | Roda a bateria de testes automatizados (145 testes) |
+| `testar.cmd` | Roda a bateria de testes automatizados (147 testes) |
 | `empacotar.cmd` | Gera o `.zip` pronto para entregar a outra pessoa |
 | `ambiente.cmd` | Acha o Java e o Maven — os outros o chamam; não precisa rodar |
 
@@ -381,7 +381,7 @@ MyApp\
    │  ├─ modules\              inicio, lembretes, notas, kanban — um pacote por módulo
    │  └─ ui\                   componentes globais: botões, avisos, diálogos, busca…
    ├─ main\resources\css\app.css   todo o visual, com as cores declaradas uma vez
-   └─ test\java\br\com\myapp\      os 145 testes
+   └─ test\java\br\com\myapp\      os 147 testes
 ```
 
 ### Regras da casa

@@ -95,6 +95,9 @@ public class TextoSelecionavel extends StackPane {
                 default -> selecionarLinha(indice);
             }
             redesenhar();
+            // Consumido: senão a rolagem em volta (ScrollPane) pede o foco
+            // para si logo depois, e o Ctrl+C vai para ela, não para cá.
+            e.consume();
         });
 
         addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> {

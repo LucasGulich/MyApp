@@ -31,6 +31,11 @@ Na primeira abertura o quadro já vem com **A fazer**, **Em andamento** e
 **Concluído** — não para impor um método, mas porque um quadro vazio não
 explica o que é uma coluna, e as três são o suficiente para entender.
 
+**Só na primeira abertura.** Se você excluir todas, o quadro fica vazio — e
+continua vazio ao fechar e abrir o MyApp. Até a v1.11.1 a regra era "o quadro
+está vazio?", e as três voltavam a cada abertura. Agora a pergunta é "já
+existiu alguma coluna?": como a exclusão é lógica, a resposta fica no banco.
+
 ## O que dá para fazer
 
 | Gesto | O que acontece |

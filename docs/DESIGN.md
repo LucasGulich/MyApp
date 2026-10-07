@@ -419,6 +419,29 @@ Regras:
   vai dentro de um `FlowPane` (que o encosta à esquerda com a largura
   preferida) nem de um `HBox` sem `Hgrow`: ele substitui o contêiner da
   lista em vez de entrar nele.
+- **Ocupando a área de uma tela ou coluna, vai em cartão: `.emCartao()`.**
+  O vazio vira o próprio cartão (a mesma superfície da `Secao`), estica até
+  o fim da área e centraliza o conteúdo na altura e na largura — como os
+  vazios da tela inicial. Só fica sem cartão quando **já está dentro de um**
+  (as `Secao` do Início), para não virar cartão dentro de cartão.
+- **Quem usa `.emCartao()` não mexe na rolagem.** Enquanto o vazio está na
+  tela, a `ScrollPane` em volta passa a esticar o conteúdo; quando ele sai
+  (chegou o primeiro item, trocou de tela), ela volta a ser como era, e a
+  lista longa continua rolando.
+
+```
+  Lembretes                                      [+ Novo lembrete]
+  [busca...........]  [Todos ▾]  [Por proximidade ▾]
+  ╭──────────────────────────────────────────────────────────────╮
+  │                                                              │
+  │                          ╭──────╮                            │
+  │                          │  🔔  │                            │
+  │                          ╰──────╯                            │
+  │                Você ainda não tem lembretes.                 │
+  │                 [ +  Criar o primeiro lembrete ]             │
+  │                                                              │
+  ╰──────────────────────────────────────────────────────────────╯
+```
 
 ## Texto que se seleciona
 
@@ -505,6 +528,6 @@ uma barra azul mostra de que lado ele vai entrar.
 5. Toda exclusão passa por `Dialogos.confirmarExclusao`.
 6. Formulário com mais de cinco campos vira `Secao`.
 7. Busca é `CampoBusca`, e o filtro compara com `Texto.contem`.
-8. Tela que pode ficar vazia mostra um `EstadoVazio`, com botão comum.
+8. Tela que pode ficar vazia mostra um `EstadoVazio`, com botão comum — em cartão (`.emCartao()`) quando ocupa a área da tela ou da coluna.
 9. Formulário que cria ou salva liga `Dialogos.salvarComCtrlS`.
 10. Nenhuma cor escrita à mão: só os símbolos `-cor-*`.

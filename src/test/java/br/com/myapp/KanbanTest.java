@@ -80,6 +80,21 @@ class KanbanTest {
     }
 
     @Test
+    @DisplayName("As colunas de exemplo nascem só na primeira abertura")
+    void colunasIniciaisSoNaPrimeiraVez() {
+        servico.criarColunasIniciaisNaPrimeiraVez();
+        assertEquals(3, servico.quadro().size());
+
+        servico.criarColunasIniciaisNaPrimeiraVez();
+        assertEquals(3, servico.quadro().size(), "a segunda abertura não duplica");
+
+        servico.quadro().forEach(c -> servico.excluirColuna(c.getId()));
+        servico.criarColunasIniciaisNaPrimeiraVez();   // fechou e abriu o MyApp
+        assertTrue(servico.quadro().isEmpty(),
+                "quadro vazio foi escolha do usuário: as colunas não podem voltar");
+    }
+
+    @Test
     @DisplayName("Coluna sem nome não é aceita")
     void colunaPrecisaDeNome() {
         ColunaKanban vazia = new ColunaKanban();

@@ -263,7 +263,10 @@ public final class Dialogos {
             });
 
             palco.setScene(cena);
-            palco.setMinWidth(400);
+            // A largura mínima vai no conteúdo, não na janela: com a mínima na
+            // janela, uma mensagem curta deixava a janela com 400 e a cena com
+            // menos, e a sobra aparecia como uma faixa branca à direita.
+            raiz.setMinWidth(400);
             palco.setResizable(false);
             palco.sizeToScene();
 

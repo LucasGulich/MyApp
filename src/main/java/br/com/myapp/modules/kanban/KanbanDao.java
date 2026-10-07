@@ -189,6 +189,21 @@ public class KanbanDao {
         }
     }
 
+    /**
+     * Se o quadro já teve alguma coluna, mesmo excluída. Como a exclusão é
+     * lógica, nenhuma linha quer dizer "o Kanban nunca foi aberto".
+     */
+    public boolean jaTeveColuna() {
+        try (PreparedStatement ps = Database.conexao().prepareStatement(
+                "SELECT 1 FROM kanban_coluna LIMIT 1");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            // Na dúvida, não cria nada: exemplo a mais é pior que nenhum.
+            return true;
+        }
+    }
+
     private int proximaOrdemDeColuna() {
         try (PreparedStatement ps = Database.conexao().prepareStatement(
                 "SELECT COALESCE(MAX(ordem), -1) + 1 FROM kanban_coluna WHERE data_exclusao IS NULL");

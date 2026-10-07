@@ -77,7 +77,7 @@ A agenda não mostra só hoje. Na barra do painel:
 | Visão | O que mostra | ‹ e › andam |
 |---|---|---|
 | **Dia** | A lista com horário. Para hoje, com a linha da hora atual e os próximos dias; para outro dia, só ele | um dia |
-| **Semana** | Sete colunas, de segunda a domingo, com cada compromisso em miniatura | uma semana |
+| **Semana** | Sete colunas, de domingo a sábado (como no calendário do Windows), com cada compromisso em miniatura | uma semana |
 | **Mês** | A folhinha: até 3 compromissos por dia e "+2 mais" | um mês |
 | **Ano** | Doze folhinhas pequenas; o dia com compromisso ganha cor, mais forte quanto mais cheio | um ano |
 

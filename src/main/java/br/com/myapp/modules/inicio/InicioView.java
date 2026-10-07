@@ -395,9 +395,9 @@ public class InicioView extends BorderPane {
                 areaAgenda.getChildren().add(listaHoje);
             }
             case SEMANA -> {
-                LocalDate segunda = CalendarioGrade.inicioDaSemana(referencia);
+                LocalDate inicio = CalendarioGrade.inicioDaSemana(referencia);
                 areaAgenda.getChildren().add(CalendarioGrade.semana(referencia,
-                        servico.porDia(segunda, segunda.plusDays(6)), acoesDaGrade));
+                        servico.porDia(inicio, inicio.plusDays(6)), acoesDaGrade));
             }
             case MES -> {
                 YearMonth mes = YearMonth.from(referencia);
@@ -431,12 +431,12 @@ public class InicioView extends BorderPane {
                 yield referencia.getYear() == hoje.getYear() ? dia : dia + " de " + referencia.getYear();
             }
             case SEMANA -> {
-                LocalDate segunda = CalendarioGrade.inicioDaSemana(referencia);
-                LocalDate domingo = segunda.plusDays(6);
+                LocalDate inicio = CalendarioGrade.inicioDaSemana(referencia);
+                LocalDate fim = inicio.plusDays(6);
                 DateTimeFormatter diaMes = DateTimeFormatter.ofPattern("d 'de' MMMM", CalendarioGrade.PT_BR);
-                yield segunda.getMonth() == domingo.getMonth()
-                        ? segunda.getDayOfMonth() + " – " + diaMes.format(domingo) + " de " + domingo.getYear()
-                        : diaMes.format(segunda) + " – " + diaMes.format(domingo) + " de " + domingo.getYear();
+                yield inicio.getMonth() == fim.getMonth()
+                        ? inicio.getDayOfMonth() + " – " + diaMes.format(fim) + " de " + fim.getYear()
+                        : diaMes.format(inicio) + " – " + diaMes.format(fim) + " de " + fim.getYear();
             }
             case MES -> CalendarioGrade.maiuscula(DateTimeFormatter
                     .ofPattern("MMMM 'de' yyyy", CalendarioGrade.PT_BR).format(referencia));

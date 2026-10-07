@@ -92,7 +92,7 @@ public class KanbanView extends BorderPane {
     public KanbanView() {
         getStyleClass().add("conteudo");
 
-        servico.criarColunasIniciaisSeVazio();
+        servico.criarColunasIniciaisNaPrimeiraVez();
 
         setTop(montarCabecalho());
         setCenter(montarQuadro());
@@ -148,11 +148,8 @@ public class KanbanView extends BorderPane {
         colunas = servico.quadro();
         quadro.getChildren().clear();
 
-        rolagem.setFitToWidth(colunas.isEmpty());
         if (colunas.isEmpty()) {
-            EstadoVazio vazio = montarEstadoVazio();
-            HBox.setHgrow(vazio, Priority.ALWAYS);
-            quadro.getChildren().add(vazio);
+            quadro.getChildren().add(montarEstadoVazio());
             contador.setText("0 colunas");
             return;
         }
@@ -174,7 +171,8 @@ public class KanbanView extends BorderPane {
         return new EstadoVazio(Icone.Simbolo.QUADRO, "O quadro ainda não tem colunas.")
                 .comExplicacao("Uma coluna é uma etapa do seu fluxo: \"A fazer\", \"Em andamento\", "
                         + "\"Concluído\". Os cartões andam entre elas conforme o trabalho anda.")
-                .comAcao("Criar a primeira coluna", () -> abrirEditorDeColuna(null));
+                .comAcao("Criar a primeira coluna", () -> abrirEditorDeColuna(null))
+                .emCartao();
     }
 
     // --------------------------------------------------------------- colunas

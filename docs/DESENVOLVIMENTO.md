@@ -78,7 +78,7 @@ configuração extra.
 
 ## Testes
 
-145 testes. As frentes principais:
+147 testes. As frentes principais:
 
 | Classe | O que cobre |
 |---|---|
@@ -127,14 +127,14 @@ O que o script faz:
    `myapp.jar`, e a compilação falharia no meio
 2. lê a versão do `pom.xml` (não é escrita em lugar nenhum: assim não tem como
    divergir do que foi empacotado)
-3. `mvn clean package` — compila e **roda os 145 testes**; build quebrado não
+3. `mvn clean package` — compila e **roda os 147 testes**; build quebrado não
    vira pacote
 4. monta `target\app` com o jar e as bibliotecas
 5. `jpackage --type app-image` → `target\instalador\MyApp\`
 6. compacta em `distribuicao\`, **fora de `target\`**, que qualquer
    `mvn clean` apagaria
 
-A versão também aparece no pé do menu ("By: Lucas Gulich · v1.11.0") e vem
+A versão também aparece no pé do menu ("By: Lucas Gulich · v1.11.2") e vem
 do mesmo lugar: no build, o Maven copia o `<version>` do `pom.xml` para
 `versao.properties`, o **único recurso filtrado** — o CSS e a configuração da
 ical4j ficam fora do filtro, para nada ser substituído neles. `core.Versao`
