@@ -1,4 +1,4 @@
-package br.com.myapp.modules.notas;
+package br.com.myapp.ui;
 
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;

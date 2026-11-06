@@ -6,12 +6,16 @@ import br.com.myapp.agendas.DialogoEvento;
 import br.com.myapp.agendas.PainelAgendas;
 import br.com.myapp.core.Config;
 import br.com.myapp.core.EventBus;
+import br.com.myapp.core.Links;
+import br.com.myapp.core.Log;
+import br.com.myapp.modules.ModuleRegistry;
 import br.com.myapp.modules.lembretes.LembreteEditor;
 import br.com.myapp.modules.lembretes.LembreteService;
 import br.com.myapp.security.SecurityService;
 import br.com.myapp.ui.Arrastavel;
 import br.com.myapp.ui.Aviso;
 import br.com.myapp.ui.Botoes;
+import br.com.myapp.ui.CampoBusca;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.EstadoVazio;
 import br.com.myapp.ui.Icone;
@@ -19,6 +23,7 @@ import br.com.myapp.ui.Secao;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -82,6 +87,10 @@ public class InicioView extends BorderPane {
      * largura preferida e fica encostado à esquerda — era o que acontecia.
      */
     private final VBox areaMural = new VBox();
+
+    /** O bloco inteiro dos recados, que sai da tela em Configurações > Exibição. */
+    private Secao mural;
+
     private final Label saudacao = new Label();
     private final Label resumoDoDia = new Label();
 
@@ -117,6 +126,27 @@ public class InicioView extends BorderPane {
     private final Label tituloPeriodo = new Label();
     private final VBox areaAgenda = new VBox();
     private final ToggleGroup grupoVisoes = new ToggleGroup();
+
+    // --- busca na agenda ---
+
+    /** Menos que isso não é busca: uma letra acha metade da agenda. */
+    private static final int MINIMO_DA_BUSCA = 2;
+
+    private static final DateTimeFormatter DATA_NA_BUSCA =
+            DateTimeFormatter.ofPattern("EEE dd/MM/yy", CalendarioGrade.PT_BR);
+
+    private final CampoBusca busca = new CampoBusca("Buscar na agenda...");
+
+    /** Espera a pessoa parar de digitar, para não buscar a cada letra. */
+    private final PauseTransition esperaBusca = new PauseTransition(Duration.millis(300));
+
+    /** O que está sendo mostrado como resultado; vazio = a agenda normal. */
+    private String termoBusca = "";
+
+    /** Descarta o resultado de uma busca que já foi trocada por outra. */
+    private int geracaoBusca;
+    /** Ordem dos resultados da busca; vale até fechar o aplicativo. */
+    private boolean maisRecentesPrimeiro = true;
 
     // --- sincronizar as agendas do Google ---
 
@@ -167,6 +197,10 @@ public class InicioView extends BorderPane {
         // Trancar e destrancar mostram e escondem os títulos protegidos.
         EventBus.ouvir(SecurityService.EstadoMudou.class,
                 e -> Platform.runLater(this::recarregarHoje));
+        // O mural e o atalho para Lembretes dependem do que está ligado em
+        // Configurações > Exibição.
+        EventBus.ouvir(ModuleRegistry.ExibicaoMudou.class,
+                e -> Platform.runLater(this::recarregar));
 
         recarregar();
         manterRelogioEmDia();
@@ -279,8 +313,13 @@ public class InicioView extends BorderPane {
         botaoSincronizar.setGraphic(iconeSincronizar);
         botaoSincronizar.setOnAction(e -> sincronizarAgendas());
 
+        busca.setMinWidth(180);
+        busca.setPrefWidth(240);
+        busca.textProperty().addListener((obs, antes, agora) -> aoDigitarNaBusca());
+        esperaBusca.setOnFinished(e -> iniciarBusca());
+
         return new Secao(Icone.Simbolo.CALENDARIO, "AGENDA", barra, areaAgenda)
-                .comAcoes(botaoSincronizar);
+                .comAcoes(busca, botaoSincronizar);
     }
 
     private static Button botaoDaPilula(Icone.Simbolo simbolo, String dica) {
@@ -295,7 +334,7 @@ public class InicioView extends BorderPane {
      * quais agendas, e quando foi a última sincronização.
      */
     private void atualizarBotaoSincronizar() {
-        List<Agenda> agendas = AgendaService.listar();
+        List<Agenda> agendas = AgendaService.listarAtivas();
         botaoSincronizar.setVisible(!agendas.isEmpty());
         botaoSincronizar.setManaged(!agendas.isEmpty());
         if (agendas.isEmpty()) {
@@ -319,7 +358,7 @@ public class InicioView extends BorderPane {
      * enquanto isso, e o aviso no fim diz como foi.
      */
     private void sincronizarAgendas() {
-        List<Agenda> agendas = AgendaService.listar();
+        List<Agenda> agendas = AgendaService.listarAtivas();
         // Recém-aberto e ainda trancado, o MyApp não sabe os endereços: eles
         // vão cifrados, e a chave só vem com a senha. Ver a decisão 43.
         if (agendas.stream().noneMatch(a -> AgendaService.link(a.getId()).isPresent())) {
@@ -356,6 +395,7 @@ public class InicioView extends BorderPane {
 
     /** Troca de visão e/ou de período, lembrando a visão para a próxima abertura. */
     private void mudarVisao(Visao nova, LocalDate dia) {
+        sairDaBusca();
         if (nova != visao) {
             visao = nova;
             Config.get().visaoAgenda = nova.name();
@@ -368,6 +408,7 @@ public class InicioView extends BorderPane {
 
     /** ‹ e ›: um dia, uma semana, um mês ou um ano, conforme a visão. */
     private void andar(int passos) {
+        sairDaBusca();
         referencia = switch (visao) {
             case DIA -> referencia.plusDays(passos);
             case SEMANA -> referencia.plusWeeks(passos);
@@ -386,6 +427,13 @@ public class InicioView extends BorderPane {
             referencia = agora.toLocalDate();
         }
         ultimoMinutoDesenhado = agora.truncatedTo(ChronoUnit.MINUTES);
+
+        if (!termoBusca.isEmpty()) {
+            desenharBusca();
+            atualizarCabecalho();
+            atualizarBotaoSincronizar();
+            return;
+        }
 
         tituloPeriodo.setText(tituloDoPeriodo());
         areaAgenda.getChildren().clear();
@@ -442,6 +490,130 @@ public class InicioView extends BorderPane {
                     .ofPattern("MMMM 'de' yyyy", CalendarioGrade.PT_BR).format(referencia));
             case ANO -> String.valueOf(referencia.getYear());
         };
+    }
+
+    // ---------------------------------------------------------------- busca
+
+    private void aoDigitarNaBusca() {
+        if (busca.getText().isBlank()) {
+            esperaBusca.stop();
+            boolean estavaBuscando = !termoBusca.isEmpty();
+            termoBusca = "";
+            if (estavaBuscando) {
+                recarregarHoje();
+            }
+            return;
+        }
+        esperaBusca.playFromStart();
+    }
+
+    private void iniciarBusca() {
+        String texto = busca.getText().trim();
+        if (texto.length() < MINIMO_DA_BUSCA) {
+            return;
+        }
+        termoBusca = texto;
+        recarregarHoje();
+    }
+
+    /**
+     * Volta para a agenda normal. Zera o termo antes de limpar o campo, para
+     * o campo vazio não pedir outro redesenho: quem chama já vai redesenhar.
+     */
+    private void sairDaBusca() {
+        esperaBusca.stop();
+        termoBusca = "";
+        busca.limpar();
+    }
+
+    /**
+     * Procura fora da thread da tela — calcular três anos de recorrências de
+     * uma agenda grande não pode travar a janela — e descarta o resultado se
+     * a pessoa já trocou o termo.
+     */
+    private void desenharBusca() {
+        int geracao = ++geracaoBusca;
+        String termo = termoBusca;
+        boolean destrancado = SecurityService.estaDestrancado();
+
+        tituloPeriodo.setText("Resultados para “" + termo + "”");
+        Label buscando = new Label("Buscando…");
+        buscando.getStyleClass().add("texto-fraco");
+        areaAgenda.getChildren().setAll(buscando);
+
+        new Thread(() -> {
+            InicioService.ResultadoBusca resultado = null;
+            try {
+                resultado = servico.buscar(termo, destrancado);
+            } catch (RuntimeException e) {
+                Log.aviso("A busca na agenda falhou: " + e.getMessage());
+            }
+            InicioService.ResultadoBusca pronto = resultado;
+            Platform.runLater(() -> {
+                if (geracao != geracaoBusca) {
+                    return;
+                }
+                if (pronto == null) {
+                    areaAgenda.getChildren().clear();
+                    Aviso.erro("Não foi possível buscar na agenda.");
+                    return;
+                }
+                areaAgenda.getChildren().setAll(listaDeResultados(pronto, termo));
+            });
+        }, "buscar-agenda").start();
+    }
+
+    private VBox listaDeResultados(InicioService.ResultadoBusca resultado, String termo) {
+        VBox lista = new VBox(8);
+        if (resultado.itens().isEmpty()) {
+            lista.getChildren().add(new EstadoVazio(Icone.Simbolo.BUSCAR,
+                    "Nada encontrado para “" + termo + "”.")
+                    .comExplicacao("A busca olha o título, a descrição e o local, nos lembretes e "
+                            + "nas agendas conectadas, de " + InicioService.BUSCA_ANOS_ATRAS
+                            + " anos atrás até " + InicioService.BUSCA_ANOS_A_FRENTE
+                            + " ano à frente. Evento protegido só é procurado com o MyApp destrancado."));
+            return lista;
+        }
+        int quantos = resultado.itens().size();
+        Label resumo = new Label(resultado.cortou()
+                ? "Mostrando os " + quantos + " mais próximos de hoje, de " + resultado.total()
+                        + " que combinam. Use mais palavras para refinar."
+                : quantos == 1 ? "1 resultado" : quantos + " resultados");
+        resumo.getStyleClass().add("secao-dica");
+        resumo.setMinWidth(0);
+
+        HBox cabecalho = new HBox(12, seletorDeOrdem(resultado, termo), resumo);
+        cabecalho.setAlignment(Pos.CENTER_LEFT);
+        lista.getChildren().add(cabecalho);
+
+        List<InicioService.CompromissoDoDia> ordenados = new ArrayList<>(resultado.itens());
+        Comparator<InicioService.CompromissoDoDia> porData =
+                Comparator.comparing(InicioService.CompromissoDoDia::quando);
+        ordenados.sort(maisRecentesPrimeiro ? porData.reversed() : porData);
+        ordenados.forEach(item -> lista.getChildren().add(linhaDoCompromisso(item, true)));
+        return lista;
+    }
+
+    /** "Mais recentes | Mais antigas": reordena sem refazer a busca. */
+    private HBox seletorDeOrdem(InicioService.ResultadoBusca resultado, String termo) {
+        ToggleGroup grupo = new ToggleGroup();
+        HBox seletor = new HBox(0);
+        seletor.getStyleClass().add("seletor-visao");
+        seletor.setMinWidth(Region.USE_PREF_SIZE);
+        for (boolean recentes : new boolean[]{true, false}) {
+            ToggleButton botao = new ToggleButton(recentes ? "Mais recentes" : "Mais antigas");
+            botao.setToggleGroup(grupo);
+            botao.setSelected(recentes == maisRecentesPrimeiro);
+            botao.setOnAction(e -> {
+                botao.setSelected(true);
+                if (recentes != maisRecentesPrimeiro) {
+                    maisRecentesPrimeiro = recentes;
+                    areaAgenda.getChildren().setAll(listaDeResultados(resultado, termo));
+                }
+            });
+            seletor.getChildren().add(botao);
+        }
+        return seletor;
     }
 
     /**
@@ -538,6 +710,16 @@ public class InicioView extends BorderPane {
     }
 
     private HBox linhaDoCompromisso(InicioService.CompromissoDoDia item) {
+        return linhaDoCompromisso(item, false);
+    }
+
+    /**
+     * @param emBusca resultado de busca: a data vem completa (dia da semana e
+     *                ano), porque o que se procura pode estar em qualquer mês,
+     *                e o que já passou não fica apagado — passado é justamente
+     *                o que se quer achar
+     */
+    private HBox linhaDoCompromisso(InicioService.CompromissoDoDia item, boolean emBusca) {
         boolean ehHoje = item.quando().toLocalDate().equals(LocalDate.now());
         boolean diaTodo = item.ehDaAgenda() && item.evento().evento().diaInteiro();
 
@@ -545,7 +727,9 @@ public class InicioView extends BorderPane {
         faixa.getStyleClass().add("faixa-cor");
         faixa.setStyle("-fx-background-color: " + corSegura(item.cor()) + ";");
 
-        Label hora = new Label(diaTodo
+        Label hora = new Label(emBusca
+                ? DATA_NA_BUSCA.format(item.quando())
+                : diaTodo
                 ? DateTimeFormatter.ofPattern("dd/MM").format(item.quando())
                 : ehHoje
                 ? HORA.format(item.quando())
@@ -558,6 +742,17 @@ public class InicioView extends BorderPane {
         String complemento = null;
         if (diaTodo) {
             complemento = "dia todo";
+            // Férias e folga de vários dias: o primeiro dia sozinho enganaria.
+            LocalDate ultimo = item.fim().toLocalDate().minusDays(1);
+            if (emBusca && ultimo.isAfter(item.quando().toLocalDate())) {
+                complemento += " · até " + DateTimeFormatter.ofPattern("dd/MM").format(ultimo);
+            }
+        } else if (emBusca) {
+            complemento = HORA.format(item.quando());
+            if (item.fim() != null && item.fim().isAfter(item.quando())
+                    && item.fim().toLocalDate().equals(item.quando().toLocalDate())) {
+                complemento += " até " + HORA.format(item.fim());
+            }
         } else if (item.fim() != null && item.fim().isAfter(item.quando())
                 && item.fim().toLocalDate().equals(item.quando().toLocalDate())) {
             complemento = "até " + HORA.format(item.fim());
@@ -607,7 +802,7 @@ public class InicioView extends BorderPane {
         linha.getStyleClass().add("clicavel");
         linha.setOnMouseClicked(e -> abrirItem(item));
 
-        if (item.jaPassou()) {
+        if (item.jaPassou() && !emBusca) {
             linha.getStyleClass().add("passou");
         }
         if (item.emAndamento()) {
@@ -633,8 +828,43 @@ public class InicioView extends BorderPane {
                 linha.getChildren().add(entrar);
             }
             linha.getChildren().add(seloDaAgenda(item.evento().agenda()));
+        } else {
+            // Lembrete não tem fim: o botão fica mesmo depois da hora, porque
+            // a reunião das 14h ainda está acontecendo às 14h10.
+            if (!protegido) {
+                lembretes.oQueAbrir(item.lembrete()).ifPresent(alvo -> {
+                    boolean reuniao = Links.ehReuniao(alvo);
+                    Button abrir = Botoes.miudo(reuniao ? "Entrar" : "Abrir", Icone.Simbolo.ABRIR_FORA);
+                    if (reuniao) {
+                        abrir.getStyleClass().add("botao-entrar");
+                    }
+                    Botoes.instalarDica(abrir, reuniao ? "Abrir a reunião no navegador" : "Abrir " + alvo);
+                    abrir.setOnAction(e -> abrirDoLembrete(alvo, item.lembrete().getId()));
+                    abrir.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, javafx.event.Event::consume);
+                    linha.getChildren().add(abrir);
+                });
+            }
+            linha.getChildren().add(seloDoLembrete());
         }
         return linha;
+    }
+
+    /** O sino no canto: par do "G" do Google, para dizer que é lembrete do MyApp. */
+    private Label seloDoLembrete() {
+        Label selo = new Label();
+        selo.setGraphic(Icone.de(Icone.Simbolo.LEMBRETE, 11, "icone-selo"));
+        selo.getStyleClass().addAll("selo-agenda", "selo-lembrete");
+        Botoes.instalarDica(selo, "Lembrete do MyApp. Clique na linha para editar.");
+        return selo;
+    }
+
+    private void abrirDoLembrete(String alvo, Long id) {
+        // Fora da thread da tela, como o "Entrar" da reunião.
+        new Thread(() -> {
+            if (!lembretes.abrirAlvo(alvo, id)) {
+                Platform.runLater(() -> Aviso.erro("Não foi possível abrir: " + alvo));
+            }
+        }, "abrir-lembrete").start();
     }
 
     /**
@@ -680,7 +910,7 @@ public class InicioView extends BorderPane {
         // a janela não pode congelar esperando.
         new Thread(() -> {
             try {
-                java.awt.Desktop.getDesktop().browse(java.net.URI.create(link));
+                br.com.myapp.core.Links.abrir(link);
             } catch (Exception e) {
                 Platform.runLater(() -> Aviso.erro("Não foi possível abrir o link da reunião."));
             }
@@ -758,6 +988,13 @@ public class InicioView extends BorderPane {
             if (minuto.equals(ultimoMinutoDesenhado)) {
                 return;
             }
+            // Resultado de busca não anda com o relógio: refazer a busca a
+            // cada minuto só piscaria a lista que a pessoa está lendo.
+            if (!termoBusca.isEmpty()) {
+                ultimoMinutoDesenhado = minuto;
+                atualizarCabecalho();
+                return;
+            }
             // Mês e ano só mudam com o dia: redesenhar o ano inteiro a cada
             // minuto seria trabalho à toa. Dia e semana mostram o que já passou
             // apagado, e isso anda com o relógio.
@@ -775,10 +1012,14 @@ public class InicioView extends BorderPane {
     }
 
     private EstadoVazio nadaParaHoje() {
-        return new EstadoVazio(Icone.Simbolo.CAFE, "Nenhum compromisso marcado para hoje.")
+        EstadoVazio vazio = new EstadoVazio(Icone.Simbolo.CAFE, "Nenhum compromisso marcado para hoje.")
                 .comExplicacao("O que tiver hora marcada nos lembretes aparece aqui, "
-                        + "em ordem, com o que já passou separado do que ainda vem.")
-                .comAcao("Criar um lembrete", this::abrirLembretes);
+                        + "em ordem, com o que já passou separado do que ainda vem.");
+        // Com Lembretes fora do menu, o botão levaria a uma tela escondida.
+        if (ModuleRegistry.estaVisivel("lembretes")) {
+            vazio.comAcao("Criar um lembrete", this::abrirLembretes);
+        }
+        return vazio;
     }
 
     private void abrirLembretes() {
@@ -799,11 +1040,21 @@ public class InicioView extends BorderPane {
         muralRecados.setAlignment(Pos.TOP_LEFT);
         muralRecados.setPadding(new Insets(4, 0, 0, 0));
 
-        return new Secao(Icone.Simbolo.RECADO, "RECADOS", areaMural).comAcoes(novo);
+        mural = new Secao(Icone.Simbolo.RECADO, "RECADOS", areaMural).comAcoes(novo);
+        return mural;
     }
 
     private void recarregarRecados() {
         muralRecados.getChildren().clear();
+
+        // Desligado nas configurações: o bloco sai inteiro e a agenda fica
+        // sozinha na tela. Os recados continuam guardados.
+        boolean ligado = Config.get().mostrarRecados;
+        mural.setVisible(ligado);
+        mural.setManaged(ligado);
+        if (!ligado) {
+            return;
+        }
 
         List<Recado> recados = servico.listarRecados();
 

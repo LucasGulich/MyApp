@@ -5,6 +5,7 @@ import br.com.myapp.ui.Aviso;
 import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.Interruptor;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -112,8 +113,16 @@ public class PainelAgendas extends VBox {
         VBox textos = new VBox(3, nome, estado);
         HBox.setHgrow(textos, Priority.ALWAYS);
 
+        Interruptor chave = new Interruptor();
+        chave.setLigado(agenda.isAtiva());
+        Botoes.instalarDica(chave, agenda.isAtiva()
+                ? "Desligar: a agenda some da tela Hoje e para de avisar, sem perder o cadastro"
+                : "Ligar: a agenda volta para a tela Hoje e sincroniza na hora");
+        chave.ligadoProperty().addListener((obs, antes, agora) -> ativar(agenda, agora));
+
         Button sincronizar = Botoes.icone(Icone.Simbolo.GERAR, "Sincronizar agora");
         sincronizar.setOnAction(e -> sincronizar(agenda, sincronizar, estado));
+        sincronizar.setDisable(!agenda.isAtiva());
 
         Button editar = Botoes.icone(Icone.Simbolo.EDITAR, "Editar");
         editar.setOnAction(e -> new DialogoAgenda(janela(), agenda).abrir());
@@ -121,15 +130,30 @@ public class PainelAgendas extends VBox {
         Button excluir = Botoes.iconePerigo(Icone.Simbolo.EXCLUIR, "Desconectar esta agenda");
         excluir.setOnAction(e -> excluir(agenda));
 
-        HBox linha = new HBox(12, faixa, textos, sincronizar, editar, excluir);
+        HBox linha = new HBox(12, faixa, textos, chave, sincronizar, editar, excluir);
         linha.setAlignment(Pos.CENTER_LEFT);
         linha.getStyleClass().add("linha-compromisso");
+        if (!agenda.isAtiva()) {
+            linha.getStyleClass().add("desligada");
+        }
         return linha;
+    }
+
+    private void ativar(Agenda agenda, boolean ativa) {
+        AgendaService.ativar(agenda.getId(), ativa);
+        if (ativa) {
+            Aviso.sucesso("Agenda \"" + agenda.getNome() + "\" ligada.");
+        } else {
+            Aviso.info("Agenda \"" + agenda.getNome() + "\" desligada. Ligue de novo quando quiser.");
+        }
     }
 
     private void descreverEstado(Agenda agenda, Label rotulo) {
         rotulo.getStyleClass().removeAll("texto-ok", "texto-alerta", "texto-fraco");
-        if (agenda.getUltimoErro() != null) {
+        if (!agenda.isAtiva()) {
+            rotulo.setText("Desligada: não aparece na tela Hoje, não avisa e não sincroniza.");
+            rotulo.getStyleClass().add("texto-fraco");
+        } else if (agenda.getUltimoErro() != null) {
             String copia = agenda.jaSincronizou()
                     ? " Usando a cópia de " + quando(agenda.getSincronizadaEm()) + "."
                     : "";

@@ -136,8 +136,27 @@ public final class AgendaService {
 
     // ------------------------------------------------------------ cadastro
 
+    /** Todas as agendas cadastradas, ligadas ou não. É a lista das configurações. */
     public static List<Agenda> listar() {
         return DAO.listar();
+    }
+
+    /** Só as ligadas: as que aparecem na tela, avisam e sincronizam. */
+    public static List<Agenda> listarAtivas() {
+        return DAO.listar().stream().filter(Agenda::isAtiva).toList();
+    }
+
+    /**
+     * Liga ou desliga a agenda sem excluir. Ao religar, sincroniza na hora,
+     * porque a cópia guardada parou no dia em que foi desligada.
+     */
+    public static void ativar(long id, boolean ativa) {
+        DAO.definirAtiva(id, ativa);
+        CACHE.remove(id);
+        EventBus.publicar(new AgendasMudaram());
+        if (ativa) {
+            sincronizarAgora(id);
+        }
     }
 
     public static Optional<Agenda> porId(long id) {
@@ -189,7 +208,7 @@ public final class AgendaService {
      */
     public static List<EventoNaAgenda> eventosEntre(LocalDateTime de, LocalDateTime ate) {
         List<EventoNaAgenda> lista = new ArrayList<>();
-        for (Agenda agenda : DAO.listar()) {
+        for (Agenda agenda : listarAtivas()) {
             for (Evento e : eventosDa(agenda, de, ate)) {
                 lista.add(new EventoNaAgenda(agenda, e));
             }
@@ -286,7 +305,7 @@ public final class AgendaService {
 
     private static void sincronizarTodas() {
         try {
-            for (Agenda agenda : DAO.listar()) {
+            for (Agenda agenda : listarAtivas()) {
                 sincronizar(agenda.getId());
             }
         } catch (Exception e) {
@@ -303,8 +322,9 @@ public final class AgendaService {
      *         saber o endereço (aplicativo nunca destrancado desde que abriu)
      */
     public static boolean sincronizar(long id) {
-        // Pela lista das vivas, e não por porId: agenda excluída não sincroniza.
-        Optional<Agenda> encontrada = DAO.listar().stream()
+        // Pela lista das ligadas, e não por porId: agenda excluída ou
+        // desligada não sincroniza.
+        Optional<Agenda> encontrada = listarAtivas().stream()
                 .filter(a -> a.getId() == id)
                 .findFirst();
         if (encontrada.isEmpty()) {

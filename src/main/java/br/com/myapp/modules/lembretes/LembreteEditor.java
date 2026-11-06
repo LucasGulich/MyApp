@@ -6,13 +6,14 @@ import br.com.myapp.core.WindowsIntegracao;
 import br.com.myapp.security.SecurityService;
 import br.com.myapp.ui.Icone;
 import br.com.myapp.ui.Dialogos;
+import br.com.myapp.ui.ListaOpcoes;
+import br.com.myapp.ui.Opcao;
 import br.com.myapp.ui.Secao;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -73,15 +74,15 @@ public class LembreteEditor {
     // --- campos ---
     private final TextField campoTitulo = new TextField();
     private final TextArea campoDescricao = new TextArea();
-    private final CheckBox campoSensivel = new CheckBox("Proteger este lembrete com a senha mestra");
+    private final Opcao campoSensivel = new Opcao(Icone.Simbolo.CADEADO, "Proteger este lembrete com a senha mestra");
     private final ComboBox<TipoRecorrencia> campoTipo = new ComboBox<>();
     private final DatePicker campoData = new DatePicker();
     private final TextField campoHora = new TextField();
-    private final CheckBox campoTemFim = new CheckBox("Parar de repetir em");
+    private final Opcao campoTemFim = new Opcao(Icone.Simbolo.CALENDARIO, "Parar de repetir em");
     private final DatePicker campoFim = new DatePicker();
     private final Spinner<Integer> campoDiaMes = new Spinner<>(1, 31, 1);
     private final Spinner<Integer> campoIntervalo = new Spinner<>(1, 10080, 30);
-    private final CheckBox campoSom = new CheckBox("Tocar som quando este lembrete alertar");
+    private final Opcao campoSom = new Opcao(Icone.Simbolo.SOM, "Tocar som quando este lembrete alertar");
     private final ColorPicker campoCor = new ColorPicker();
     private final TextField campoAcao = new TextField();
 
@@ -189,11 +190,10 @@ public class LembreteEditor {
         campoDescricao.setPrefRowCount(3);
         campoDescricao.setWrapText(true);
 
-        campoSensivel.setTooltip(new Tooltip(
-                "O título e a descrição ficam cifrados no banco e só aparecem com o app destrancado."));
+        campoSensivel.comDescricao("O título e a descrição ficam cifrados no banco e só aparecem com o app destrancado.");
 
-        VBox protecao = new VBox(4,
-                campoSensivel,
+        VBox protecao = new VBox(6,
+                new ListaOpcoes(campoSensivel),
                 Secao.dica("Datas e horários continuam legíveis, para o aviso sair no horário "
                         + "mesmo com o aplicativo trancado."));
 
@@ -266,14 +266,11 @@ public class LembreteEditor {
         ouvir.getStyleClass().add("botao");
         ouvir.setGraphic(Icone.de(Icone.Simbolo.SOM, 16));
         ouvir.setOnAction(e -> WindowsIntegracao.tocarAlerta());
-        ouvir.disableProperty().bind(campoSom.selectedProperty().not());
-
-        HBox linha = new HBox(14, campoSom, ouvir);
-        linha.setAlignment(Pos.CENTER_LEFT);
+        campoSom.comExtra(ouvir);
 
         return new Secao(Icone.Simbolo.SOM, "SOM",
-                linha,
-                Secao.dica("Desmarque para este lembrete aparecer em silêncio. "
+                new ListaOpcoes(campoSom),
+                Secao.dica("Desligue para este lembrete aparecer em silêncio. "
                         + "Qual som toca é escolhido uma vez só, em Configurações."));
     }
 
@@ -346,12 +343,9 @@ public class LembreteEditor {
         campoFim.getStyleClass().add("campo");
         campoFim.setPrefWidth(180);
         campoFim.setConverter(ConversorData.BRASILEIRO);
-        campoFim.disableProperty().bind(campoTemFim.selectedProperty().not());
+        campoTemFim.comExtra(campoFim);
 
-        HBox linha = new HBox(10, campoTemFim, campoFim);
-        linha.setAlignment(Pos.CENTER_LEFT);
-
-        blocoFim.getChildren().addAll(Secao.campo("Até quando"), linha);
+        blocoFim.getChildren().addAll(Secao.campo("Até quando"), new ListaOpcoes(campoTemFim));
         blocoFim.setManaged(false);
         blocoFim.setVisible(false);
     }

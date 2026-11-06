@@ -25,6 +25,11 @@ public class InicioModule implements AppModule {
     }
 
     @Override
+    public String descricao() {
+        return "A tela que abre depois da senha: a agenda do dia e os recados. Fica sempre no menu.";
+    }
+
+    @Override
     public Icone.Simbolo icone() {
         return Icone.Simbolo.INICIO;
     }
@@ -32,6 +37,11 @@ public class InicioModule implements AppModule {
     @Override
     public int ordem() {
         return 0;
+    }
+
+    @Override
+    public boolean podeOcultar() {
+        return false;
     }
 
     @Override

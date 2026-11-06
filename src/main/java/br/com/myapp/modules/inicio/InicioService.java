@@ -3,6 +3,7 @@ package br.com.myapp.modules.inicio;
 import br.com.myapp.agendas.AgendaService;
 import br.com.myapp.agendas.Evento;
 import br.com.myapp.core.EventBus;
+import br.com.myapp.core.Texto;
 import br.com.myapp.modules.lembretes.CalculadoraOcorrencias;
 import br.com.myapp.modules.lembretes.Lembrete;
 import br.com.myapp.modules.lembretes.LembreteDao;
@@ -250,6 +251,117 @@ public class InicioService {
         }
         lista.sort(Comparator.comparing(CompromissoDoDia::quando));
         return lista;
+    }
+
+    // -------------------------------------------------------------- busca
+
+    /** Quanto do passado e do futuro a busca da agenda enxerga. */
+    static final int BUSCA_ANOS_ATRAS = 2;
+    static final int BUSCA_ANOS_A_FRENTE = 1;
+
+    /** Mais que isso não cabe numa lista que alguém vai ler: pede para refinar. */
+    static final int BUSCA_MAXIMO = 300;
+
+    /**
+     * O que a busca achou.
+     *
+     * @param itens em ordem de data
+     * @param total quantos casaram ao todo; maior que {@code itens.size()}
+     *              quando a lista foi cortada em {@link #BUSCA_MAXIMO}
+     */
+    public record ResultadoBusca(List<CompromissoDoDia> itens, int total) {
+        public boolean cortou() {
+            return total > itens.size();
+        }
+    }
+
+    /**
+     * Procura nos lembretes e nas agendas conectadas, no passado e no futuro,
+     * por título, descrição e local.
+     *
+     * Ignora acento e maiúscula, e com mais de uma palavra exige todas — "folga
+     * maio" acha "Folga do Lucas" em maio, em qualquer ordem. Quem casa
+     * primeiro é o texto, e só então se calculam as ocorrências: um lembrete
+     * que não tem nada a ver com a busca não custa o cálculo de três anos.
+     *
+     * Com o aplicativo trancado, o que é protegido fica de fora: a tela mostra
+     * "Evento protegido" no lugar do título, e a busca não pode ser um jeito de
+     * descobrir o que está escondido.
+     *
+     * O lembrete "a cada X minutos" entra uma vez, na próxima ocorrência, como
+     * na grade do mês: senão um "beber água a cada 30 min" tomaria a lista.
+     * Passando de {@link #BUSCA_MAXIMO}, ficam os mais próximos de hoje.
+     */
+    public ResultadoBusca buscar(String termo, boolean destrancado) {
+        List<String> palavras = palavrasDaBusca(termo);
+        if (palavras.isEmpty()) {
+            return new ResultadoBusca(List.of(), 0);
+        }
+        LocalDate hoje = LocalDate.now();
+        LocalDateTime de = hoje.minusYears(BUSCA_ANOS_ATRAS).atStartOfDay();
+        LocalDateTime ate = hoje.plusYears(BUSCA_ANOS_A_FRENTE).atTime(23, 59, 59);
+
+        List<CompromissoDoDia> achados = new ArrayList<>();
+        for (Lembrete lembrete : lembreteDao.listarAtivos()) {
+            if (lembrete.isSensivel() && !destrancado) {
+                continue;
+            }
+            if (!casa(palavras, lembrete.getTitulo(), lembrete.getDescricao())) {
+                continue;
+            }
+            if (lembrete.getTipo() == TipoRecorrencia.INTERVALO) {
+                for (LocalDate d = hoje; d.isBefore(hoje.plusDays(60)); d = d.plusDays(1)) {
+                    Optional<LocalDateTime> primeira = primeiraDoDia(lembrete, d);
+                    if (primeira.isPresent()) {
+                        achados.add(CompromissoDoDia.de(lembrete, primeira.get()));
+                        break;
+                    }
+                }
+                continue;
+            }
+            for (LocalDateTime quando : CalculadoraOcorrencias.entre(lembrete, de, ate)) {
+                achados.add(CompromissoDoDia.de(lembrete, quando));
+            }
+        }
+        for (AgendaService.EventoNaAgenda e : AgendaService.eventosEntre(de, ate)) {
+            if (e.agenda().isProtegida() && !destrancado) {
+                continue;
+            }
+            Evento ev = e.evento();
+            if (casa(palavras, ev.titulo(), ev.descricao(), ev.local())) {
+                achados.add(CompromissoDoDia.de(e));
+            }
+        }
+
+        int total = achados.size();
+        if (total > BUSCA_MAXIMO) {
+            LocalDateTime agora = LocalDateTime.now();
+            achados.sort(Comparator.comparingLong(c -> Math.abs(
+                    java.time.Duration.between(agora, c.quando()).toMinutes())));
+            achados = new ArrayList<>(achados.subList(0, BUSCA_MAXIMO));
+        }
+        achados.sort(Comparator.comparing(CompromissoDoDia::quando)
+                .thenComparing(CompromissoDoDia::titulo));
+        return new ResultadoBusca(achados, total);
+    }
+
+    /** As palavras do que foi digitado, sem acento e em minúsculas. */
+    static List<String> palavrasDaBusca(String termo) {
+        String limpo = Texto.paraBusca(termo).trim();
+        if (limpo.isEmpty()) {
+            return List.of();
+        }
+        return List.of(limpo.split("\\s+"));
+    }
+
+    /** Todas as palavras aparecem em algum dos textos? */
+    static boolean casa(List<String> palavras, String... textos) {
+        StringBuilder junto = new StringBuilder();
+        for (String texto : textos) {
+            junto.append(Texto.paraBusca(texto)).append(' ');
+        }
+        String alvo = junto.toString();
+        return palavras.stream().allMatch(alvo::contains);
     }
 
     /** Quantos compromissos ainda estão por vir hoje. */

@@ -5,6 +5,8 @@ import br.com.myapp.ui.Aviso;
 import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.ListaOpcoes;
+import br.com.myapp.ui.Opcao;
 import br.com.myapp.ui.Secao;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -12,7 +14,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -56,13 +57,15 @@ public class DialogoAgenda {
     private final PasswordField campoLink = new PasswordField();
     private final TextField campoLinkVisivel = new TextField();
     private final Label resultadoTeste = new Label();
-    private final CheckBox campoOcultarRecusados =
-            new CheckBox("Esconder os convites que eu recusei");
-    private final CheckBox campoProtegida =
-            new CheckBox("Tratar como protegida");
-    private final CheckBox campoSom = new CheckBox("Tocar som");
-    private final CheckBox campoDiaInteiro =
-            new CheckBox("Avisar também os de dia inteiro, às");
+    private final Opcao campoOcultarRecusados =
+            new Opcao(Icone.Simbolo.OLHO_FECHADO, "Esconder os convites que eu recusei");
+    private final Opcao campoProtegida =
+            new Opcao(Icone.Simbolo.CADEADO, "Tratar como protegida")
+                    .comDescricao("Com o MyApp trancado, os eventos aparecem como \"Evento protegido\", "
+                            + "só com o horário — igual ao lembrete protegido.");
+    private final Opcao campoSom = new Opcao(Icone.Simbolo.SOM, "Tocar som");
+    private final Opcao campoDiaInteiro =
+            new Opcao(Icone.Simbolo.CALENDARIO, "Avisar também os de dia inteiro, às");
     private final TextField campoHoraDiaInteiro = new TextField();
     private final Map<Integer, ToggleButton> botoesAviso = new LinkedHashMap<>();
 
@@ -145,16 +148,8 @@ public class DialogoAgenda {
                         + "cifrado, e não deve ser colado em mais lugar nenhum."));
 
         Secao opcoes = new Secao(Icone.Simbolo.FERRAMENTA, "OPÇÕES",
-                campoOcultarRecusados,
-                campoProtegida,
-                Secao.dica("Protegida: com o MyApp trancado, os eventos aparecem como "
-                        + "\"Evento protegido\", só com o horário — igual ao lembrete protegido."));
+                new ListaOpcoes(campoOcultarRecusados, campoProtegida));
 
-        // Opções longas quebram linha em vez de virar "...".
-        for (CheckBox c : new CheckBox[]{campoOcultarRecusados, campoProtegida}) {
-            c.setWrapText(true);
-            c.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-        }
         resultadoTeste.setWrapText(true);
         resultadoTeste.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
         resultadoTeste.setMaxWidth(440);
@@ -182,11 +177,10 @@ public class DialogoAgenda {
             atalhos.getChildren().add(botao);
         });
         // "Avisar também os de dia inteiro, às [09:00]": a hora fica na própria
-        // frase, e só vale com a opção marcada.
+        // frase, e só vale com a opção ligada.
         campoHoraDiaInteiro.getStyleClass().add("campo");
         campoHoraDiaInteiro.setPromptText("09:00");
         campoHoraDiaInteiro.setPrefWidth(76);
-        campoHoraDiaInteiro.disableProperty().bind(campoDiaInteiro.selectedProperty().not());
         Botoes.instalarDica(campoHoraDiaInteiro, "Aceita 8, 8h30, 0830 ou 08:30");
         // Ao sair do campo, mostra a hora como foi entendida: "8h30" vira
         // "08:30", e algo que não é hora volta para a anterior.
@@ -195,14 +189,12 @@ public class DialogoAgenda {
                 campoHoraDiaInteiro.setText(HORA.format(horaDiaInteiroDigitada()));
             }
         });
-        HBox linhaDiaInteiro = new HBox(8, campoDiaInteiro, campoHoraDiaInteiro);
-        linhaDiaInteiro.setAlignment(Pos.CENTER_LEFT);
+        campoDiaInteiro.comExtra(campoHoraDiaInteiro);
 
         return new Secao(Icone.Simbolo.LEMBRETE, "QUANDO AVISAR",
                 "Antes de cada evento. Pode marcar mais de um; nenhum marcado, a agenda não avisa.",
                 atalhos,
-                campoSom,
-                linhaDiaInteiro,
+                new ListaOpcoes(campoSom, campoDiaInteiro),
                 Secao.dica("O aviso traz o botão Entrar quando a reunião tem link do Meet, "
                         + "Teams ou Zoom."));
     }

@@ -5,13 +5,14 @@ import br.com.myapp.security.SecurityService;
 import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.ListaOpcoes;
+import br.com.myapp.ui.Opcao;
 import br.com.myapp.ui.Secao;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
@@ -44,8 +45,8 @@ public class EditorCard {
     private final TextArea campoDescricao = new TextArea();
     private final DatePicker campoPrazo = new DatePicker();
     private final ToggleGroup grupoCores = new ToggleGroup();
-    private final CheckBox campoProtegido =
-            new CheckBox("Proteger este cartão com a senha mestra");
+    private final Opcao campoProtegido =
+            new Opcao(Icone.Simbolo.CADEADO, "Proteger este cartão com a senha mestra");
 
     public EditorCard(Window dono, long colunaId, CardKanban existente) {
         this.dono = dono;
@@ -167,7 +168,7 @@ public class EditorCard {
         }
 
         return new Secao(Icone.Simbolo.ESCUDO, "SEGURANÇA",
-                campoProtegido,
+                new ListaOpcoes(campoProtegido),
                 Secao.dica("Título e descrição ficam cifrados no banco. Com o "
                         + "aplicativo trancado, o cartão continua no lugar — só o "
                         + "texto some."));

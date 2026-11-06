@@ -37,6 +37,14 @@ Google tem duração ("até 15:41"), um "G" à direita, o botão **Entrar** quan
 tem link de reunião, e só passa para "já foi" quando termina. Os de dia
 inteiro ficam em fichas no topo do painel.
 
+Lembrete do MyApp tem o seu selo, um sino em tom neutro no lugar do "G"
+(v1.19.1). E ganha botão quando tem o que abrir: o campo **Abrir junto com o
+alerta** ou, se ele estiver vazio, uma sala do Meet, Zoom ou Teams colada na
+descrição ou no título. Sala de reunião vira **Entrar**, em azul; outro link,
+pasta ou arquivo vira **Abrir**. Como lembrete não tem fim, o botão continua
+depois da hora: a reunião das 14h ainda está acontecendo às 14h10. A busca do
+link de reunião é a mesma dos eventos do Google (`Links.linkDeReuniao`).
+
 A tela não cria nem altera nada. Para os lembretes, usa exatamente o mesmo
 cálculo de ocorrências que o agendador usa para disparar os avisos
 (`CalculadoraOcorrencias`), de modo que **o que aparece aqui é o que vai
@@ -105,6 +113,50 @@ Dia e semana se redesenham a cada minuto, como a lista de hoje sempre fez.
 Mês e ano, só quando o dia vira: redesenhar o ano inteiro a cada minuto seria
 trabalho à toa.
 
+## Buscar na agenda
+
+No painel da agenda, ao lado do ⟳, o campo **Buscar na agenda...**:
+
+```
+  [‹] Hoje [›]   Resultados para “folga”   [Dia|Semana|Mês|Ano]   [ folga   ✕ ]
+  3 resultados
+  ▍ sex 03/10/26   Folga                                             G
+  ▍ dia todo
+  ▍ seg 13/10/26   Folga compensação de hora extra                   🔔
+  ▍ 09:00
+```
+
+Serve para achar o que se lembra de ter, mas não **quando**: "tive uma folga
+mês passado, em que dia?".
+
+- Olha **título, descrição e local**, nos lembretes do MyApp e nas agendas do
+  Google conectadas, de **2 anos atrás até 1 ano à frente**.
+- Ignora acento e maiúscula. Com mais de uma palavra, exige **todas**, em
+  qualquer ordem: "folga maio".
+- Começa depois de **2 letras** e de uma pausa de 0,3 s na digitação.
+- Cada resultado mostra a data **completa** (dia da semana e ano) e, nos eventos
+  de vários dias, até quando vão ("dia todo · até 12/10"). O que já passou
+  **não fica apagado**: aqui o passado é justamente o que se procura.
+- No alto da lista, o seletor **Mais recentes | Mais antigas** ordena por data.
+  O padrão é o mais recente primeiro; trocar não refaz a busca, só reordena, e a
+  escolha vale até fechar o MyApp.
+- Clicar num resultado abre o mesmo detalhe da agenda (evento ou lembrete).
+- **Esc** ou o **X** limpam a busca e voltam à agenda. Trocar de visão, andar com
+  ‹ › ou clicar em **Hoje** também saem dela.
+- O Ctrl+F leva o cursor para este campo.
+- Lembrete "a cada X minutos" aparece **uma vez**, na próxima ocorrência, como
+  na grade do mês. Passando de 300 resultados, ficam os **300 mais próximos de
+  hoje**, com um aviso para refinar.
+- Com o MyApp **trancado**, lembrete e agenda protegidos ficam de fora: a tela
+  mostra "Evento protegido" no lugar do título, e a busca não pode ser um jeito
+  de descobrir o que está escondido. Destrancado, entram normalmente.
+
+O cálculo roda **fora da thread da tela** (três anos de recorrências de uma
+agenda grande não podem travar a janela), e o resultado de uma busca que já foi
+trocada por outra é descartado (`geracaoBusca`). A tela não anda com o relógio
+enquanto mostra resultados: refazer a busca a cada minuto só piscaria a lista.
+A regra mora em `InicioService.buscar`; a tela só desenha.
+
 ## Recados
 
 São os papéis adesivos. Bilhete rápido, do tamanho de um post-it: sem data,
@@ -129,6 +181,10 @@ baixa — o recado parece apoiado, não desenhado.
 > Tirar um recado é exclusão lógica, como tudo no aplicativo: ele sai do mural
 > e continua no banco.
 
+**O mural é opcional.** Em Configurações → Exibição, a chave *Recados*, pendurada
+logo abaixo do Início, tira o bloco inteiro da tela (`Config.mostrarRecados`).
+A agenda fica sozinha; os recados continuam guardados e voltam ao religar.
+
 ## Arrastar para reordenar
 
 O mesmo componente (`Arrastavel`) atende as três telas: recados, lembretes e
@@ -152,7 +208,7 @@ posição".
 | Arquivo | Papel |
 |---|---|
 | `InicioView` | A tela |
-| `InicioService` | Agenda do dia e por período (lembretes e agendas do Google) e recados |
+| `InicioService` | Agenda do dia e por período (lembretes e agendas do Google), a busca na agenda e os recados |
 | `CalendarioGrade` | As grades de semana, mês e ano |
 | `Recado` / `CorRecado` / `RecadoDao` | O modelo do papel adesivo |
 | `PostIt` | O recado desenhado, com menu e cores |

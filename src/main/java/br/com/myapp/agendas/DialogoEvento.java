@@ -23,8 +23,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -209,7 +207,7 @@ public class DialogoEvento {
     private static void abrir(String link) {
         new Thread(() -> {
             try {
-                Desktop.getDesktop().browse(URI.create(link));
+                br.com.myapp.core.Links.abrir(link);
             } catch (Exception ex) {
                 javafx.application.Platform.runLater(() -> Aviso.erro("Não foi possível abrir o navegador."));
             }

@@ -69,6 +69,12 @@ public final class Icone {
                 + "M13.73 21a2 2 0 0 1 -3.46 0"),
         NOTA("M14 2H6a2 2 0 0 0 -2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2V8z"
                 + "M14 2v6h6M16 13H8M16 17H8M10 9H8"),
+        GRADE("M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1H4a1 1 0 0 1 -1 -1V4a1 1 0 0 1 1 -1z"
+                + "M15 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1V4a1 1 0 0 1 1 -1z"
+                + "M15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1z"
+                + "M4 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1H4a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1z"),
+        GLOBO("M22 12a10 10 0 1 1 -20 0 10 10 0 0 1 20 0z" + "M2 12h20"
+                + "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1 -4 10 15.3 15.3 0 0 1 -4 -10 15.3 15.3 0 0 1 4 -10z"),
         QUADRO("M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1 -1 1H4a1 1 0 0 1 -1 -1V4a1 1 0 0 1 1 -1z"
                 + "M9 3v18M15 3v18"),
         CONFIGURACOES("M12.2 2h-.4a2 2 0 0 0 -2 2v.2a2 2 0 0 1 -1 1.7l-.4.3a2 2 0 0 1 -2 0"
@@ -185,6 +191,9 @@ public final class Icone {
                 + "M8 6h.1M12 6h.1M8 10h.1M12 10h.1M8 14h.1M12 14h.1"),
         FERRAMENTA("M14.7 6.3a4 4 0 0 0 5.3 5.3l-9.4 9.4a2.1 2.1 0 0 1 -3 -3z"
                 + "M14.7 6.3 18 3l3 3-3.3 3.3"),
+        REGUA("M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1 -3.4 0L2.7 8.7"
+                + "a2.4 2.4 0 0 1 0 -3.4l2.6 -2.6a2.4 2.4 0 0 1 3.4 0z"
+                + "M14.5 12.5l2 -2M11.5 9.5l2 -2M8.5 6.5l2 -2M17.5 15.5l2 -2"),
         CARRINHO("M9 21a1 1 0 1 1 -2 0 1 1 0 0 1 2 0z"
                 + "M20 21a1 1 0 1 1 -2 0 1 1 0 0 1 2 0z"
                 + "M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2 -1.6L23 6H6"),
@@ -313,6 +322,8 @@ public final class Icone {
         mapa.put("estrela", Simbolo.ESTRELA);
         mapa.put("etiqueta", Simbolo.ETIQUETA);
         mapa.put("calendario", Simbolo.CALENDARIO);
+        mapa.put("globo", Simbolo.GLOBO);
+        mapa.put("grade", Simbolo.GRADE);
         return mapa;
     }
 

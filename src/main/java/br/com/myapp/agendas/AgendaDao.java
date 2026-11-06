@@ -163,6 +163,23 @@ public class AgendaDao {
         }
     }
 
+    /**
+     * Liga ou desliga a agenda. Separado do {@link #salvar}: não mexe no link,
+     * e por isso funciona mesmo com o aplicativo trancado.
+     */
+    public void definirAtiva(long id, boolean ativa) {
+        try (PreparedStatement ps = Database.conexao().prepareStatement(
+                "UPDATE agenda SET ativa = ?, atualizado_em = ? WHERE id = ?")) {
+            ps.setInt(1, ativa ? 1 : 0);
+            ps.setLong(2, Instant.now().toEpochMilli());
+            ps.setLong(3, id);
+            ps.executeUpdate();
+            Log.info("Agenda " + (ativa ? "ligada" : "desligada") + ": id=" + id);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Falha ao ligar/desligar a agenda", e);
+        }
+    }
+
     /** Exclusão lógica: a agenda some da tela e para de sincronizar. */
     public void excluir(long id) {
         try (PreparedStatement ps = Database.conexao().prepareStatement(
@@ -180,7 +197,7 @@ public class AgendaDao {
 
     // -------------------------------------------------------------- leitura
 
-    /** Agendas vivas, sem o link. */
+    /** Agendas vivas, ligadas ou não, sem o link. */
     public List<Agenda> listar() {
         List<Agenda> lista = new ArrayList<>();
         String sql = "SELECT * FROM agenda WHERE data_exclusao IS NULL ORDER BY nome COLLATE NOCASE, id";
@@ -247,6 +264,7 @@ public class AgendaDao {
         a.setUltimoErro(rs.getString("ultimo_erro"));
         a.setOcultarRecusados(rs.getInt("ocultar_recusados") == 1);
         a.setProtegida(rs.getInt("protegida") == 1);
+        a.setAtiva(rs.getInt("ativa") == 1);
         a.antecedenciasCsv(rs.getString("antecedencias"));
         a.setSomAtivo(rs.getInt("som_ativo") == 1);
         a.setAvisarDiaInteiro(rs.getInt("avisar_dia_inteiro") == 1);

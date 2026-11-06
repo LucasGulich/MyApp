@@ -1,5 +1,7 @@
 package br.com.myapp.agendas;
 
+import br.com.myapp.core.Links;
+
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
@@ -28,8 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Um arquivo .ics lido e pronto para responder "o que acontece entre tal e
@@ -51,10 +51,6 @@ import java.util.regex.Pattern;
  *    a todo evento com Meet.
  */
 public final class ArquivoIcs {
-
-    private static final Pattern LINK_REUNIAO = Pattern.compile(
-            "https://(?:meet\\.google\\.com|[\\w.-]*zoom\\.us|teams\\.microsoft\\.com|teams\\.live\\.com)"
-                    + "/[^\\s<>\"']+");
 
     /** Onde começa o bloco "Participe com o Google Meet…" da descrição. */
     private static final String MARCA_BLOCO_MEET = "-::~:~::~";
@@ -192,9 +188,9 @@ public final class ArquivoIcs {
     private String linkDaReuniao(VEvent e) {
         for (String campo : List.of("X-GOOGLE-CONFERENCE", Property.LOCATION, Property.DESCRIPTION,
                 Property.URL)) {
-            Matcher m = LINK_REUNIAO.matcher(texto(e, campo));
-            if (m.find()) {
-                return m.group().replaceAll("[).,;]+$", "");
+            Optional<String> link = Links.linkDeReuniao(texto(e, campo));
+            if (link.isPresent()) {
+                return link.get();
             }
         }
         return null;

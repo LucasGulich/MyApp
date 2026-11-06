@@ -68,7 +68,7 @@ public final class AvisosDeAgenda {
     /** Dispara o que estiver na hora. Chamado pelo agendador. */
     public static void varrer(LocalDateTime agora) {
         try {
-            for (Agenda agenda : AgendaService.listar()) {
+            for (Agenda agenda : AgendaService.listarAtivas()) {
                 if (agenda.avisa()) {
                     verificar(agenda, agora);
                 }
@@ -119,7 +119,9 @@ public final class AvisosDeAgenda {
     private static void processarAdiados(LocalDateTime agora) {
         for (DisparoAgendaDao.Adiado adiado : DAO.adiadosVencidos(agora)) {
             DAO.limparAdiamento(adiado.id());
+            // Desligada no meio do adiamento: o aviso não volta.
             AgendaService.porId(adiado.agendaId())
+                    .filter(Agenda::isAtiva)
                     .flatMap(agenda -> AgendaService.eventosDaAgenda(agenda,
                                     adiado.ocorrencia().minusMinutes(1), adiado.ocorrencia().plusMinutes(1))
                             .stream()

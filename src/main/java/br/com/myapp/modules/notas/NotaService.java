@@ -4,8 +4,6 @@ import br.com.myapp.core.EventBus;
 import br.com.myapp.core.Log;
 import br.com.myapp.core.Texto;
 
-import java.awt.Desktop;
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -282,7 +280,7 @@ public class NotaService {
             url = "https://" + url;
         }
         try {
-            Desktop.getDesktop().browse(new URI(url));
+            br.com.myapp.core.Links.abrir(url);
         } catch (Exception e) {
             Log.erro("Falha ao abrir o link da nota " + nota.getId(), e);
             throw new IllegalStateException("Não foi possível abrir este endereço.");
@@ -299,7 +297,7 @@ public class NotaService {
             if (!url.startsWith("http://") && !url.startsWith("https://")) {
                 url = "https://" + url;
             }
-            Desktop.getDesktop().browse(new URI(url));
+            br.com.myapp.core.Links.abrir(url);
         } catch (Exception e) {
             Log.erro("Falha ao abrir o endereço da nota " + nota.getId(), e);
         }

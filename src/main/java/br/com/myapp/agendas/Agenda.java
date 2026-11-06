@@ -38,6 +38,9 @@ public class Agenda {
     /** A hora em que o evento de dia inteiro avisa, se avisar. */
     private LocalTime horaDiaInteiro = AvisosDeAgenda.HORA_PADRAO_DIA_INTEIRO;
     private boolean protegida;
+
+    /** Desligada: continua cadastrada, mas some da tela, não avisa e não sincroniza. */
+    private boolean ativa = true;
     private LocalDateTime criadoEm = LocalDateTime.now();
     private LocalDateTime atualizadoEm = LocalDateTime.now();
 
@@ -196,6 +199,14 @@ public class Agenda {
 
     public void setProtegida(boolean protegida) {
         this.protegida = protegida;
+    }
+
+    public boolean isAtiva() {
+        return ativa;
+    }
+
+    public void setAtiva(boolean ativa) {
+        this.ativa = ativa;
     }
 
     public LocalDateTime getCriadoEm() {

@@ -102,6 +102,10 @@ public class Shell extends BorderPane {
         EventBus.ouvir(PedidoDeNavegacao.class, pedido ->
                 Platform.runLater(() -> abrirModulo(pedido.moduloId())));
 
+        // Configurações > Exibição tirou ou devolveu algum módulo ao menu.
+        EventBus.ouvir(ModuleRegistry.ExibicaoMudou.class, e ->
+                Platform.runLater(this::aplicarExibicao));
+
         abrirModulo(primeiroModuloId());
     }
 
@@ -164,6 +168,7 @@ public class Shell extends BorderPane {
             botoesMenu.put(modulo.id(), botao);
             menu.getChildren().add(botao);
         }
+        aplicarExibicao();
 
         Region espaco = new Region();
         VBox.setVgrow(espaco, Priority.ALWAYS);
@@ -278,13 +283,35 @@ public class Shell extends BorderPane {
     }
 
     private String primeiroModuloId() {
-        return ModuleRegistry.todos().isEmpty() ? null : ModuleRegistry.todos().get(0).id();
+        return ModuleRegistry.visiveis().isEmpty() ? null : ModuleRegistry.visiveis().get(0).id();
+    }
+
+    /**
+     * Mostra no menu só os módulos escolhidos em Configurações &gt; Exibição.
+     *
+     * Os botões de todos existem desde a abertura; esconder é tirar do
+     * layout, para os de baixo subirem sem deixar buraco. Se o módulo aberto
+     * acabou de sair do menu, a tela volta para o início — continuar nele
+     * deixaria a tela sem item destacado e sem caminho de volta.
+     */
+    private void aplicarExibicao() {
+        botoesMenu.forEach((id, botao) -> {
+            boolean visivel = ModuleRegistry.estaVisivel(id);
+            botao.setVisible(visivel);
+            botao.setManaged(visivel);
+        });
+        if (moduloAtual != null && !mostrandoBloqueio && !ModuleRegistry.estaVisivel(moduloAtual)) {
+            abrirModulo(primeiroModuloId());
+        }
     }
 
     // ------------------------------------------------------------- navegacao
 
     /** Troca o conteúdo para o módulo indicado. */
-    public void abrirModulo(String id) {
+    public void abrirModulo(String pedido) {
+        // Um módulo fora do menu não abre, nem a pedido de outra tela: no
+        // lugar dele vem o primeiro do menu, que é sempre o início.
+        String id = pedido != null && !ModuleRegistry.estaVisivel(pedido) ? primeiroModuloId() : pedido;
         if (id == null) {
             return;
         }

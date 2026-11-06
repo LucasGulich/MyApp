@@ -94,6 +94,7 @@ echo  [3/5] Gerando o executavel (demora cerca de um minuto)...
 "%JAVA_HOME%\bin\jpackage" ^
     --type app-image ^
     --name MyApp ^
+    --icon "%~dp0MyApp.ico" ^
     --app-version %VERSAO% ^
     --vendor "Uso pessoal" ^
     --description "Workbench pessoal - lembretes, kanban e notas" ^
@@ -143,6 +144,7 @@ if defined TEM_WIX (
     "%JAVA_HOME%\bin\jpackage" ^
         --type msi ^
         --name MyApp ^
+        --icon "%~dp0MyApp.ico" ^
         --app-version %VERSAO% ^
         --vendor "Uso pessoal" ^
         --description "Workbench pessoal - lembretes, kanban e notas" ^

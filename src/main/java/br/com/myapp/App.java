@@ -11,6 +11,7 @@ import br.com.myapp.core.WindowsIntegracao;
 import br.com.myapp.data.Database;
 import br.com.myapp.modules.ModuleRegistry;
 import br.com.myapp.modules.lembretes.LembreteService;
+import br.com.myapp.modules.uteis.Regua;
 import br.com.myapp.security.SecurityService;
 import br.com.myapp.security.SessionManager;
 import br.com.myapp.ui.Aviso;
@@ -60,6 +61,10 @@ public class App extends Application {
             Database.conexao();          // abre e migra
             Log.limparAntigos();
             ModuleRegistry.registrarPadroes();
+            // Lê os navegadores instalados já, fora da tela: as Configurações
+            // e o cadastro de atalho abrem sem esperar o registro do Windows.
+            br.com.myapp.ui.Navegadores.carregarEmSegundoPlano(() -> {
+            });
 
             montarJanela();
             ligarServicos();
@@ -230,6 +235,7 @@ public class App extends Application {
             AgendaService.parar();
             SessionManager.parar();
             BackupService.pararAutomatico();
+            Regua.desativar();               // grava o lugar da régua e fecha a faixa
             SecurityService.trancar();       // apaga a chave da memória
             if (bandeja != null) {
                 bandeja.remover();

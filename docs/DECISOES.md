@@ -893,6 +893,208 @@ grade, sem isso, as férias apareceriam só no primeiro dia.
 
 ---
 
+## 47. O menu guarda os módulos escondidos, e não os visíveis
+
+**Contexto:** a v1.12 deixou escolher, em Configurações → Exibição, quais
+módulos aparecem no menu lateral.
+
+**Decisão:** o `config.json` guarda `modulosOcultos` — a lista do que foi
+**tirado** —, e não a lista do que aparece.
+
+**Por quê:** um módulo que chega numa atualização precisa aparecer sozinho.
+Com a lista de visíveis, ele nasceria escondido para quem já tinha salvo as
+configurações uma vez, e a pessoa nem saberia que ele existe.
+
+**Junto:**
+
+- **O Início não sai do menu** (`AppModule.podeOcultar()` = falso). É a tela
+  que abre depois da senha e a que sobra quando todo o resto está escondido;
+  sem ele, o app poderia ficar sem tela nenhuma. Na aba, a chave dele vem
+  ligada, mas a linha fica esmaecida e não responde ao clique: lê-se "ativo,
+  e não é com você". Não usa `setDisable`, que apagaria o balão de descrição.
+- **Módulo escondido não abre por outro caminho.** `Shell.abrirModulo`
+  troca o pedido pelo Início. Sem isso, um botão de outra tela (o "Criar um
+  lembrete" do dia vazio) abriria uma tela sem item no menu e sem volta.
+- **Esconder não desliga.** O módulo continua registrado: lembretes seguem
+  avisando, e a agenda da tela inicial continua lendo os lembretes.
+- **A mudança vale na hora**, pelo evento `ModuleRegistry.ExibicaoMudou`:
+  o `Shell` refaz o menu e a tela inicial mostra ou tira o mural.
+
+---
+
+## 48. A chave liga/desliga substitui a caixa de seleção no app inteiro
+
+**Contexto:** a chave nasceu na aba Exibição (v1.12). O usuário gostou e
+pediu o mesmo padrão "para todo o sistema".
+
+**Decisão:** `ui.Opcao` (ícone, nome, campos extras, chave) e `ui.ListaOpcoes`
+(o cartão com traços entre as linhas) viraram as peças de toda opção
+liga/desliga. Não sobrou `CheckBox` no código.
+
+**Como, sem reescrever as telas:** `Opcao` responde como a `CheckBox`
+(`isSelected`, `setSelected`, `selectedProperty`, `setText`). Cada tela trocou
+o tipo do campo e embrulhou as opções num `ListaOpcoes`.
+
+**Junto:**
+
+- **Campos que completam a frase** ("Parar de repetir em [data]", "Avisar os de
+  dia inteiro às [hora]", o botão "Ouvir" do som) entram com `comExtra(...)`:
+  ficam na linha, desabilitados com a chave desligada, e clicar neles não
+  alterna a chave.
+- **A descrição vai no balão**, nunca em texto miúdo ao lado — foi o que o
+  usuário pediu na aba Exibição.
+- **Até as letras do gerador de senhas** (a-z, A-Z, 0-9, símbolos) viraram
+  chaves. Pensei em deixar caixa para "marcar itens de uma lista", mas o pedido
+  foi o padrão em tudo, e cada uma delas liga ou desliga um grupo de caracteres.
+
+---
+
+## 49. O baixador usa o yt-dlp de fora, e os programas ficam no %LOCALAPPDATA%
+
+**Contexto:** o usuário baixava do YouTube pelo CMD com o yt-dlp e queria isso
+dentro do MyApp, funcionando também num PC que nunca rodou o `winget install`.
+
+**Decisão:** o MyApp **não** embute o yt-dlp. Ele procura o programa (primeiro
+na pasta dele, depois no PATH) e, se faltar, **baixa da página oficial no
+GitHub** com um clique, junto com FFmpeg e Deno.
+
+**Por que não embutir:** o yt-dlp precisa de atualização a cada poucas semanas,
+porque o YouTube muda. Embutido, cada mudança do YouTube exigiria uma versão
+nova do MyApp; de fora, é `yt-dlp -U`. E o instalador do MyApp ganharia 260 MB
+para quem nunca vai usar o baixador.
+
+**Por que conferir a soma SHA-256:** é o que garante que o `.exe` que vai rodar
+é o que o projeto publicou — e não um download cortado ou trocado no caminho.
+A soma vem do mesmo lugar que o arquivo, então não protege contra o GitHub
+comprometido; protege contra todo o resto, e custa nada. Ver `SEGURANCA.md`.
+
+**Por que %LOCALAPPDATA% e não %APPDATA%:** são ~450 MB extraídos que se baixam
+de novo a qualquer hora. O %APPDATA% (Roaming) é a pasta que perfis
+corporativos copiam a cada login, e é onde ficam os dados de verdade.
+
+**Por que o Deno:** desde 2025 o YouTube exige rodar um código JavaScript para
+liberar os formatos, e o yt-dlp usa o Deno para isso. Sem ele, muitos vídeos
+falham ou vêm só em baixa qualidade.
+
+---
+
+## 50. Sobrescrever o histórico do Ctrl+C faz 25 cópias, não 20
+
+**Contexto:** o pedido foi copiar "." e ".." alternados 20 vezes, "para
+sobrescrever todo o histórico".
+
+**Decisão:** 25 cópias.
+
+**Por quê:** o histórico do Windows (Win+V) guarda os 25 últimos itens. Com 20,
+os 5 mais antigos ficariam lá — e o objetivo declarado era não sobrar nada. O
+número é uma constante (`PainelAreaTransferencia.COPIAS`), fácil de mudar.
+
+**Corrigido na v1.13.1 — os textos também precisam ser todos diferentes.** O
+Win+V não guarda repetidos: copiar algo que já está no histórico só sobe o item
+para o topo. Com "." e ".." alternados, o usuário viu o histórico com dois itens
+e o resto intacto. Agora a sequência é ".", "..", "...", até 25 pontos — fiel à
+ideia dos pontos, e cada cópia vira um item novo. O teste passou a exigir as 25
+diferentes entre si (antes só conferia a vizinha, e deixou o erro passar).
+
+---
+
+## 51. O ícone do atalho é guardado no banco, e o do site vem do Google
+
+**Contexto:** o usuário pediu ícones nos atalhos "pra ficar mais intuitivo".
+
+**Decisão:** o ícone do programa (tirado do Windows) e o do site (favicon) são
+buscados **uma vez**, no cadastro, e guardados no banco como PNG de 64 px.
+
+**Por que guardar, e não ler a cada abertura:** pasta de rede fora do ar
+travaria a tela por segundos; site pode mudar de ícone ou sair do ar; e são uns
+3 KB por atalho. Sem ícone, o bloco usa o símbolo do tipo — nunca quebra.
+
+**Por que o favicon vem do Google (`google.com/s2/favicons`):** o `favicon.ico`
+do próprio site vem em formato ICO, que nem o JavaFX nem o `ImageIO` leem, e
+muito site esconde o ícone no HTML. O serviço do Google devolve PNG no tamanho
+pedido. **O que sai da máquina é só o domínio** (`github.com`), nunca o
+endereço inteiro — que pode ter caminho, parâmetro ou token. Domínio que o
+Google não conhece (intranet) fica com o símbolo de globo.
+
+**Junto:** favicon fica sobre uma placa clara, porque muitos são pretos e
+sumiriam no tema escuro.
+
+---
+
+## 52. Os navegadores vêm do registro, e o atalho guarda o caminho do .exe
+
+**Contexto:** o usuário pediu para escolher, por site, com qual navegador abrir.
+
+**Decisão:** a lista sai de `SOFTWAREClientsStartMenuInternet` (HKLM, a parte
+de 32 bits e HKCU), que é de onde o Windows tira a lista de "navegador padrão".
+O atalho guarda o **caminho do `.exe`** (coluna `navegador`, migração 11);
+vazio é o padrão do Windows.
+
+**Por que o registro, e não uma lista fixa de caminhos conhecidos:** pega o que
+estiver instalado — inclusive instalação só do usuário (Opera, Firefox em
+`AppData`) e navegadores que eu não listaria. O Internet Explorer fica de fora:
+no Windows 11 ele só redireciona para o Edge.
+
+**Por que o caminho, e não o nome:** é o que se executa, e continua valendo se
+o navegador mudar de nome numa atualização. Se o `.exe` sumir, abrir avisa e
+pede para escolher outro, em vez de cair calado no padrão.
+
+**Junto:** o registro é lido uma vez, fora da tela; quando chega, os blocos
+ganham o ícone do navegador no canto.
+
+---
+
+## 53. Um navegador preferido para o app inteiro, e um só lugar que abre link
+
+**Contexto:** depois do navegador por atalho (52), o usuário pediu uma
+preferência geral, valendo "quando não tiver uma configuração com maior
+prioridade".
+
+**Decisão:** `Config.navegadorPadrao` (Configurações → Sistema) e `core.Links`,
+por onde passa **todo** link do app. A ordem: atalho → preferência → Windows.
+
+**Por que valer para o app inteiro, e não só para os atalhos:** "preferência
+geral do APP". O "Entrar" da reunião abrindo num navegador e o atalho em outro
+seria justamente o que a preferência existe para evitar. Antes, seis lugares
+chamavam `Desktop.browse` cada um do seu jeito; agora é um.
+
+**Navegador sumido, dois tratamentos diferentes:**
+
+- o **do atalho** é escolha explícita para aquele site: abrir avisa e pede
+  para escolher outro, em vez de abrir em outro calado;
+- a **preferência geral** é pano de fundo: se o navegador foi desinstalado,
+  o link abre no do Windows e fica um aviso no log — um link de reunião não
+  pode travar por causa de uma preferência velha. Nas Configurações, ela
+  aparece como "(não encontrado)".
+
+**Só `http` e `https`** passam pela escolha; `mailto:` e outros vão para o
+programa que o Windows associa.
+
+---
+
+## 54. O Formatar SQL usa uma biblioteca para quebrar as linhas, e faz o resto
+
+**Contexto:** formatar SQL direito (subconsulta, CASE, JOIN, dialetos) é um
+analisador inteiro; o MyApp evita dependência, mas escrever isso do zero seria
+muito código para errar em consulta real.
+
+**Decisão:** a quebra de linhas e o recuo vêm da **sql-formatter 2.0.5**
+(`com.github.vertical-blank`): MIT, ~100 KB, **nenhuma dependência em tempo de
+execução**, dialetos PostgreSQL, MySQL, Oracle (PL/SQL), SQL Server e padrão.
+
+**O que fica com o MyApp, porque ela não faz ou faz diferente:**
+
+- **minúsculas** — ela só põe em maiúsculas ou deixa como veio;
+- **preencher os `?`** — o recurso dela não reconhece `?` no PostgreSQL, e
+  não põe aspas pelo tipo; o log do Hibernate traz o tipo, então é aqui;
+- **`id::text`** — ela separava em `id :: TEXT`;
+- **compactar numa linha** — ela não tem.
+
+Tudo o que mexe no texto passa por um separador de trechos que não toca no que
+está entre aspas nem em comentário.
+
+---
+
 ## Registro de mudanças deste documento
 
 | Data | Decisão acrescentada |
@@ -910,3 +1112,9 @@ grade, sem isso, as férias apareceriam só no primeiro dia.
 | 24/09/2026 | 41 — Ctrl+S ligado formulário a formulário (v1.9) |
 | 05/10/2026 | 42 a 44 — ical4j, endereço secreto na memória e agenda sem tabela de eventos (v1.10) |
 | 05/10/2026 | 45 e 46 — aviso de evento "o que já passou da hora" e intervalo uma vez por dia na grade (v1.11) |
+| 14/10/2026 | 47 — o menu guarda os módulos escondidos, com o Início fixo (v1.12) |
+| 14/10/2026 | 48 a 50 — chave liga/desliga em tudo, yt-dlp de fora com SHA-256, 25 cópias no Ctrl+C (v1.13) |
+| 14/10/2026 | 51 — ícone do atalho guardado no banco, favicon pelo Google só com o domínio (v1.14) |
+| 14/10/2026 | 52 — navegador por atalho de site, lido do registro, guardado pelo caminho (v1.15) |
+| 14/10/2026 | 53 — navegador preferido do app e `core.Links` como único caminho de link (v1.16) |
+| 16/10/2026 | 54 — Formatar SQL com a sql-formatter, e o resto feito aqui (v1.18) |

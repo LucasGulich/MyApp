@@ -3,20 +3,19 @@ package br.com.myapp.modules.notas;
 import br.com.myapp.ui.Aviso;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.ListaOpcoes;
+import br.com.myapp.ui.Opcao;
+import br.com.myapp.ui.SeletorSimbolo;
 import br.com.myapp.ui.Secao;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -39,10 +38,10 @@ public class DialogoCategoria {
 
     private final TextField campoNome = new TextField();
     private final ColorPicker campoCor = new ColorPicker();
-    private final CheckBox campoExigeDesbloqueio =
-            new CheckBox("Esconder esta categoria com o aplicativo trancado");
+    private final Opcao campoExigeDesbloqueio =
+            new Opcao(Icone.Simbolo.OLHO_FECHADO, "Esconder esta categoria com o aplicativo trancado");
 
-    private final ToggleGroup grupoIcones = new ToggleGroup();
+    private final SeletorSimbolo seletorIcone = new SeletorSimbolo();
 
     public DialogoCategoria(Window dono, Categoria existente, NotaService servico) {
         this.dono = dono;
@@ -95,24 +94,14 @@ public class DialogoCategoria {
         campoCor.getStyleClass().add("campo");
         campoCor.setPrefWidth(150);
 
-        FlowPane icones = new FlowPane(8, 8);
-        Icone.ESCOLHAS.forEach((chave, simbolo) -> {
-            ToggleButton botao = new ToggleButton();
-            botao.getStyleClass().add("chip-icone");
-            botao.setGraphic(Icone.de(simbolo, 20));
-            botao.setToggleGroup(grupoIcones);
-            botao.setUserData(chave);
-            icones.getChildren().add(botao);
-        });
-
         Secao identificacao = new Secao(Icone.Simbolo.PASTA, "A CATEGORIA",
                 Secao.comRotulo("Nome", campoNome),
-                Secao.comRotulo("Ícone", icones),
+                Secao.comRotulo("Ícone", seletorIcone),
                 Secao.comRotulo("Cor", campoCor));
 
         Secao seguranca = new Secao(Icone.Simbolo.ESCUDO, "SEGURANÇA",
-                campoExigeDesbloqueio,
-                Secao.dica("Com isto marcado, nem os títulos das notas desta categoria "
+                new ListaOpcoes(campoExigeDesbloqueio),
+                Secao.dica("Com isto ligado, nem os títulos das notas desta categoria "
                         + "aparecem enquanto o aplicativo estiver trancado."));
 
         VBox forma = new VBox(18, identificacao, seguranca);
@@ -163,13 +152,7 @@ public class DialogoCategoria {
         // Categorias criadas antes do catálogo vetorial guardaram um emoji.
         // Traduzindo pelo mesmo caminho que a tela usa para desenhar, a
         // seleção cai no ícone certo em vez de voltar para a pasta padrão.
-        Icone.Simbolo atual = Icone.porChave(categoria.getIcone());
-        grupoIcones.getToggles().stream()
-                .filter(t -> Icone.ESCOLHAS.get(String.valueOf(t.getUserData())) == atual)
-                .findFirst()
-                .ifPresentOrElse(
-                        t -> t.setSelected(true),
-                        () -> grupoIcones.getToggles().get(0).setSelected(true));
+        seletorIcone.selecionar(categoria.getIcone());
     }
 
     private void coletar() {
@@ -177,8 +160,8 @@ public class DialogoCategoria {
         categoria.setCor(paraHex(campoCor.getValue()));
         categoria.setExigeDesbloqueio(campoExigeDesbloqueio.isSelected());
 
-        if (grupoIcones.getSelectedToggle() != null) {
-            categoria.setIcone((String) grupoIcones.getSelectedToggle().getUserData());
+        if (seletorIcone.chave() != null) {
+            categoria.setIcone(seletorIcone.chave());
         }
     }
 

@@ -1,10 +1,10 @@
 # MyApp
 
 > Workbench desktop para o dia a dia de quem trabalha com sistemas:
-> **lembretes, notas com senhas, Kanban e recados**, num aplicativo só,
+> **lembretes, notas com senhas, Kanban, recados, atalhos e úteis**, num aplicativo só,
 > com senha mestra e criptografia.
 
-**Versão atual:** 1.11.2 · **Plataforma:** Windows 10 e 11
+**Versão atual:** 1.21.0 · **Plataforma:** Windows 10 e 11
 
 ---
 
@@ -110,6 +110,33 @@ Colunas que são etapas, cartões que andam entre elas.
 | Arquivar | Sai da vista sem sair do quadro; volta com "Mostrar arquivados" |
 | Protegido | Título e descrição cifrados |
 
+### ▦ Atalhos
+
+Programas, pastas, sites e arquivos do dia a dia, a um clique, em grupos.
+
+| Recurso | Detalhe |
+|---|---|
+| Ícones | O do programa (tirado do Windows), o do site, um símbolo com cor ou uma imagem sua |
+| Criar | Arrastando do Explorador ou do navegador para o grupo, ou pelo cadastro |
+| Abrir | Clique, ou busca + Enter |
+| Navegador | Cada site pode abrir num navegador escolhido (Chrome, Edge, Opera...) |
+| Organizar | Grupos com nome, arrastar para reordenar, mover de grupo pelo botão direito |
+
+Detalhes em [docs/ATALHOS.md](docs/ATALHOS.md).
+
+### 🔧 Úteis
+
+Pequenas ferramentas do dia a dia, uma por bloco:
+
+| Ferramenta | O que faz |
+|---|---|
+| Área de transferência | Limpa o Ctrl+C, ou sobrescreve o histórico do Win+V com 25 cópias diferentes (".", "..", "..."...) |
+| Gerador de senha | Senha aleatória ou frase-senha, com medidor de força; a cópia some em 30 s |
+| Formatar SQL | Consulta grudada vira linhas coloridas; compacta numa linha; preenche os ? a partir do log do Hibernate |
+| Baixar do YouTube | Vídeo (até 4K, em MP4) ou só o áudio (MP3/M4A), com prévia, pasta fixa, playlist, progresso e cancelar. Instala e atualiza o yt-dlp, FFmpeg e Deno sozinho |
+
+Detalhes em [docs/UTEIS.md](docs/UTEIS.md).
+
 ### 🔒 Segurança
 
 | Recurso | Detalhe |
@@ -139,6 +166,10 @@ O desenho completo, inclusive o que ele **não** protege, está em
 - **Instância única**: abrir duas vezes não duplica avisos
 - **Tema escuro e claro**, com barra de título própria que acompanha o tema
 - Barra lateral **recolhível**, para sobrar espaço
+- **Navegador preferido** (Configurações → Sistema) para todo link que o app abre;
+  cada atalho de site ainda pode ter o seu
+- **Menu sob medida**: em Configurações → Exibição, escolha quais módulos
+  aparecem (o Início é fixo) e se o mural de recados aparece na tela inicial
 - Toda ação responde com um aviso no canto ("Nota criada com sucesso!")
 - Um padrão visual só, que toda tela segue — ver [docs/DESIGN.md](docs/DESIGN.md)
 
@@ -233,7 +264,7 @@ Todos estão na raiz e funcionam com duplo clique:
 | Script | Faz |
 |---|---|
 | `executar.cmd` | Compila o que mudou e abre o aplicativo |
-| `testar.cmd` | Roda a bateria de testes automatizados (147 testes) |
+| `testar.cmd` | Roda a bateria de testes automatizados (196 testes) |
 | `empacotar.cmd` | Gera o `.zip` pronto para entregar a outra pessoa |
 | `ambiente.cmd` | Acha o Java e o Maven — os outros o chamam; não precisa rodar |
 
@@ -381,7 +412,7 @@ MyApp\
    │  ├─ modules\              inicio, lembretes, notas, kanban — um pacote por módulo
    │  └─ ui\                   componentes globais: botões, avisos, diálogos, busca…
    ├─ main\resources\css\app.css   todo o visual, com as cores declaradas uma vez
-   └─ test\java\br\com\myapp\      os 147 testes
+   └─ test\java\br\com\myapp\      os 196 testes
 ```
 
 ### Regras da casa
@@ -419,12 +450,14 @@ Como acrescentar um módulo novo: [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Como o aplicativo é montado e como acrescentar um módulo |
 | [docs/DESIGN.md](docs/DESIGN.md) | O padrão visual: cores, ícones, botões, avisos, diálogos, busca, estado vazio, atalhos |
 | [docs/SEGURANCA.md](docs/SEGURANCA.md) | A criptografia: o que protege e o que não protege |
-| [docs/DECISOES.md](docs/DECISOES.md) | Por que cada escolha técnica foi feita (46 decisões) |
+| [docs/DECISOES.md](docs/DECISOES.md) | Por que cada escolha técnica foi feita (54 decisões) |
 | [docs/INICIO.md](docs/INICIO.md) | A tela inicial: agenda do dia e recados |
 | [docs/AGENDAS.md](docs/AGENDAS.md) | Agendas do Google: conectar, sincronizar, o que aparece e por dentro |
 | [docs/LEMBRETES.md](docs/LEMBRETES.md) | O motor de agendamento por dentro |
 | [docs/NOTAS.md](docs/NOTAS.md) | Notas: tipos, segurança, gerador, destaque de sintaxe |
 | [docs/KANBAN.md](docs/KANBAN.md) | O quadro: colunas, cartões, arrastar, arquivar e prazo |
+| [docs/ATALHOS.md](docs/ATALHOS.md) | Atalhos: programas, pastas, sites e arquivos a um clique |
+| [docs/UTEIS.md](docs/UTEIS.md) | Úteis: área de transferência e baixar do YouTube (yt-dlp) |
 | [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md) | Build, testes e empacotamento em detalhe |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | O que já foi entregue e os próximos módulos |
 | [docs/PROPOSTA-NOTAS.md](docs/PROPOSTA-NOTAS.md) | A proposta original do módulo de notas |

@@ -78,7 +78,7 @@ configuração extra.
 
 ## Testes
 
-147 testes. As frentes principais:
+196 testes. As frentes principais:
 
 | Classe | O que cobre |
 |---|---|
@@ -87,6 +87,13 @@ configuração extra.
 | `FluxoCompletoTest` | Ponta a ponta: banco, senha, cifragem em disco, agendador rodando |
 | `ArquivoIcsTest` | Leitura do .ics no formato do Google: série com exceção, remarcada, cancelada, recusado, dia inteiro, fuso, link da reunião |
 | `AgendaFluxoTest` | Agenda de ponta a ponta contra um "Google" de mentira (servidor HTTP local): link cifrado, sincronizar, falhar sem perder a cópia, proteger, excluir |
+| `AtalhosTest` | Atalhos: grupos iniciais só uma vez, cadastro, ordem, mover de grupo, exclusão lógica, abrir o que não existe, deduzir tipo/nome/argumentos do caminho, navegador escolhido e desinstalado |
+| `LinksTest` | Quem decide o navegador: atalho → preferência do MyApp → Windows; preferência desinstalada cai no Windows; a do atalho sumida não é trocada calada |
+| `NavegadoresTest` | Ler os navegadores da saída real do `reg query` ("(padrão)" e "(Default)", sem o Internet Explorer, sem repetidos) |
+| `FormatadorSqlTest` | Formatar SQL: caixa só nas palavras-chave, aspas intocadas, logs do Hibernate 5 e 6, valores à mão, ? em aspas e comentário, $1/$2, compactar |
+| `UteisTest` | Úteis: somas SHA-256 nos três formatos reais (yt-dlp, FFmpeg, Deno), escolhas → linha de comando do yt-dlp, leitura do progresso, JSON do vídeo, sequência de cópias do Ctrl+C |
+| `BaixadorTest` | O que o cancelar apaga (só restos), tradução dos erros do yt-dlp, MB e tempo no jeito brasileiro |
+| `ExibicaoTest` | Módulos escondidos do menu: tudo visível de saída, Início não sai nem com config.json editado à mão, escolha gravada |
 | `AvisosEVisoesTest` | Avisos dos eventos (hora certa, uma vez só, chegou atrasado do Google, já terminou, adiar, confirmar) e a agenda por período (intervalo uma vez por dia, férias em cada dia, ano inteiro) |
 
 O `FluxoCompletoTest` usa `@TempDir` com a propriedade `myapp.home`, de modo
@@ -127,14 +134,14 @@ O que o script faz:
    `myapp.jar`, e a compilação falharia no meio
 2. lê a versão do `pom.xml` (não é escrita em lugar nenhum: assim não tem como
    divergir do que foi empacotado)
-3. `mvn clean package` — compila e **roda os 147 testes**; build quebrado não
+3. `mvn clean package` — compila e **roda os 196 testes**; build quebrado não
    vira pacote
 4. monta `target\app` com o jar e as bibliotecas
 5. `jpackage --type app-image` → `target\instalador\MyApp\`
 6. compacta em `distribuicao\`, **fora de `target\`**, que qualquer
    `mvn clean` apagaria
 
-A versão também aparece no pé do menu ("By: Lucas Gulich · v1.11.2") e vem
+A versão também aparece no pé do menu ("By: Lucas Gulich · v1.18.1") e vem
 do mesmo lugar: no build, o Maven copia o `<version>` do `pom.xml` para
 `versao.properties`, o **único recurso filtrado** — o CSS e a configuração da
 ical4j ficam fora do filtro, para nada ser substituído neles. `core.Versao`

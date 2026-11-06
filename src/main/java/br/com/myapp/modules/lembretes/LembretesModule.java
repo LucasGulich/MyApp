@@ -32,6 +32,11 @@ public class LembretesModule implements AppModule {
     }
 
     @Override
+    public String descricao() {
+        return "Compromissos com hora marcada, que avisam na tela e podem se repetir.";
+    }
+
+    @Override
     public Icone.Simbolo icone() {
         return Icone.Simbolo.LEMBRETE;
     }

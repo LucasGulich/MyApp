@@ -63,6 +63,7 @@ Detalhes em [INICIO.md](INICIO.md).
 - [x] Avisos dos eventos, com Entrar, Adiar e Confirmar (v1.11)
 - [x] Painel de detalhes do evento e "Criar lembrete a partir deste" (v1.11)
 - [x] Agenda em dia, semana, mês e ano (v1.11)
+- [x] Ligar e desligar uma agenda sem excluir (v1.19)
 
 Detalhes em [AGENDAS.md](AGENDAS.md) e [INICIO.md](INICIO.md).
 
@@ -73,6 +74,30 @@ Detalhes em [AGENDAS.md](AGENDAS.md) e [INICIO.md](INICIO.md).
 - [x] Selecionar e copiar um trecho do código, sem perder as cores
 - [x] "Copiar tudo" no cabeçalho do bloco, também para notas de texto
 - [x] Nota nova nasce na categoria aberta
+
+## Entregue — v1.12 · Menu sob medida
+
+- [x] Configurações → Exibição (antes "Aparência"): escolher os módulos do menu
+- [x] Início fixo; mural de recados ligável dentro dele
+- [x] Módulo Úteis no menu, pronto para receber as ferramentas
+
+## Entregue — v1.14 · Atalhos
+
+- [x] Grupos de atalhos com ícone do programa, do site, símbolo ou imagem
+- [x] Arrastar do Explorador ou do navegador para criar
+- [x] Busca com Enter para abrir, reordenar, mover de grupo
+
+## Entregue — v1.13 · Úteis
+
+- [x] Área de transferência: limpar e sobrescrever o histórico do Win+V
+- [x] Baixar do YouTube com o yt-dlp: vídeo ou áudio, qualidade, pasta fixa, playlist
+- [x] Instalar e atualizar yt-dlp, FFmpeg e Deno de dentro do MyApp
+- [x] Chave liga/desliga como padrão do app inteiro
+
+## Entregue — v1.21 · Régua de leitura
+
+- [x] Faixa translúcida sempre no topo, móvel e redimensionável, com opacidade e cor
+- [ ] **Atalho de teclado global** para chamar a régua com o MyApp minimizado (pede código nativo, `RegisterHotKey`; decisão pendente entre processo PowerShell auxiliar e JNA)
 
 ## Próximo passo sugerido — v1.6 · Tarefas
 
@@ -133,6 +158,10 @@ Do que estava planejado, ficou de fora:
 
 ## v2.0 · Caixa de ferramentas
 
+> **Começou na v1.12, com a casa pronta na v1.13:** o módulo **Úteis** já tem
+> área de transferência e baixador do YouTube (`docs/UTEIS.md`). As
+> ferramentas abaixo entram nele, cada uma como um bloco.
+
 Um punhado de utilitários que hoje exigem abrir um site:
 
 | Ferramenta | Para quê |
@@ -154,14 +183,15 @@ Cada uma é uma aba dentro de um único módulo.
 - Registro manual, para o que foi esquecido
 - Relatório por período, exportável
 
-## v2.2 · Atalhos rápidos
+## ~~v2.2 · Atalhos rápidos~~ — base entregue na v1.14
 
-O launcher: abrir RDP de um servidor, pasta de projeto, `.bat` de deploy, URL
-de sistema — tudo com duas teclas.
+O módulo **Atalhos** (`docs/ATALHOS.md`) já abre programas, pastas, `.bat` e
+sites em grupos, com ícones. As ideias para continuar estão no fim daquele
+documento; do plano original, falta:
 
-- Atalho global configurável
-- Agrupamento por cliente ou projeto
-- Parâmetros (usuário, IP) guardados de forma protegida
+- Atalho de teclado global configurável
+- ~~Agrupamento por cliente ou projeto~~ — são os grupos
+- Parâmetros (usuário, IP) guardados de forma protegida, para RDP e SSH
 
 ## v2.3 · Busca global
 

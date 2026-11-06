@@ -80,14 +80,22 @@ não dá.
 ## Na aba Agendas
 
 ```
-AGENDAS CONECTADAS                                 [+ Conectar agenda]
-▍ Pessoal   ⚠ Sem conexão com o Google. Usando a cópia     [⟳] [✎] [🗑]
+AGENDAS CONECTADAS                                      [+ Conectar agenda]
+▍ Pessoal   ⚠ Sem conexão com o Google. Usando a cópia  (●○) [⟳] [✎] [🗑]
 ▍           de ontem às 18:59.
-▍ Trabalho  ✓ Sincronizada há 3 min · 4 eventos nos         [⟳] [✎] [🗑]
+▍ Trabalho  ✓ Sincronizada há 3 min · 4 eventos nos      (●○) [⟳] [✎] [🗑]
 ▍           próximos 30 dias
+▍ Feriados  Desligada: não aparece na tela Hoje, não     (○●) [⟳] [✎] [🗑]
+▍           avisa e não sincroniza.
 ```
 
-- **⟳** sincroniza agora, sem esperar os 15 minutos. O mesmo botão, para todas as agendas de uma vez, fica no canto do painel Agenda da tela inicial.
+- **Chave liga/desliga** (v1.19): desligada, a agenda continua cadastrada, mas
+  some da tela Hoje (lista, dia inteiro, calendário), não avisa e não
+  sincroniza. Um aviso adiado de uma agenda desligada também não volta.
+  Religar não pede o endereço secreto de novo e já sincroniza na hora, porque
+  a cópia guardada parou no dia em que foi desligada. Fica na coluna `ativa`
+  (migração 12) e funciona mesmo com o aplicativo trancado: não mexe no link.
+- **⟳** sincroniza agora, sem esperar os 15 minutos (apagado com a agenda desligada). O mesmo botão, para todas as agendas ligadas de uma vez, fica no canto do painel Agenda da tela inicial.
 - **✎** edita nome, cor, link e opções.
 - **🗑** desconecta. É exclusão lógica, como em todo o aplicativo: a linha fica
   no banco com `data_exclusao`. No Google nada muda.

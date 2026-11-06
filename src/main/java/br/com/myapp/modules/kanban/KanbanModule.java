@@ -32,6 +32,11 @@ public class KanbanModule implements AppModule {
     }
 
     @Override
+    public String descricao() {
+        return "Quadro de colunas e cartões para acompanhar o que está em andamento.";
+    }
+
+    @Override
     public Icone.Simbolo icone() {
         return Icone.Simbolo.QUADRO;
     }

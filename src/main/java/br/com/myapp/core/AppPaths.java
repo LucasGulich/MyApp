@@ -80,6 +80,24 @@ public final class AppPaths {
         return criar(raiz().resolve("backups"));
     }
 
+    /**
+     * Programas de apoio baixados pelo MyApp (yt-dlp, FFmpeg, Deno).
+     *
+     * Fica em %LOCALAPPDATA%\MyApp\ferramentas, e não junto dos dados em
+     * %APPDATA%: são uns 300 MB que se baixam de novo a qualquer hora, e o
+     * %APPDATA% (Roaming) é a pasta que perfis corporativos copiam a cada
+     * login. Com {@code myapp.home} definido — os testes —, vai para dentro
+     * da raiz escolhida, para nada escapar da pasta temporária.
+     */
+    public static Path pastaFerramentas() {
+        String escolhida = System.getProperty(PROPRIEDADE_RAIZ);
+        String local = System.getenv("LOCALAPPDATA");
+        if ((escolhida == null || escolhida.isBlank()) && local != null && !local.isBlank()) {
+            return criar(Paths.get(local, NOME_PASTA, "ferramentas"));
+        }
+        return criar(raiz().resolve("ferramentas"));
+    }
+
     private static Path criar(Path p) {
         try {
             Files.createDirectories(p);

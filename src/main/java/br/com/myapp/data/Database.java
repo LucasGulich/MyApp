@@ -389,6 +389,64 @@ public final class Database {
                 "ALTER TABLE agenda ADD COLUMN hora_dia_inteiro TEXT NOT NULL DEFAULT '09:00'"
         });
 
+        // --- versão 10: atalhos (programas, pastas, sites, arquivos) ---
+        //
+        // O ícone tirado do programa ou do site é guardado no banco (PNG
+        // pequeno, uns poucos KB), e não lido de novo a cada abertura: uma
+        // pasta de rede fora do ar travaria a tela, e um site pode mudar de
+        // ícone ou sumir. usos e ultimo_uso já nascem para um "mais usados".
+        lista.add(new String[]{
+                """
+                CREATE TABLE atalho_grupo (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome          TEXT    NOT NULL,
+                    ordem         INTEGER NOT NULL DEFAULT 0,
+                    criado_em     INTEGER NOT NULL,
+                    atualizado_em INTEGER NOT NULL,
+                    data_exclusao INTEGER
+                )
+                """,
+                """
+                CREATE TABLE atalho (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    grupo_id      INTEGER NOT NULL REFERENCES atalho_grupo(id),
+                    nome          TEXT    NOT NULL,
+                    tipo          TEXT    NOT NULL,
+                    alvo          TEXT    NOT NULL,
+                    argumentos    TEXT,
+                    icone_modo    TEXT    NOT NULL DEFAULT 'AUTOMATICO',
+                    icone_png     BLOB,
+                    icone_simbolo TEXT,
+                    cor           TEXT,
+                    ordem         INTEGER NOT NULL DEFAULT 0,
+                    usos          INTEGER NOT NULL DEFAULT 0,
+                    ultimo_uso    INTEGER,
+                    criado_em     INTEGER NOT NULL,
+                    atualizado_em INTEGER NOT NULL,
+                    data_exclusao INTEGER
+                )
+                """,
+                "CREATE INDEX idx_atalho_grupo_vivo ON atalho_grupo(data_exclusao, ordem)",
+                "CREATE INDEX idx_atalho_do_grupo ON atalho(grupo_id, data_exclusao, ordem)"
+        });
+
+        // --- versão 11: navegador escolhido por atalho de site ---
+        //
+        // O caminho do .exe do navegador; nulo é o padrão do Windows. Guarda o
+        // caminho, e não o nome: é o que se executa, e continua valendo se o
+        // navegador mudar de nome numa atualização.
+        lista.add(new String[]{
+                "ALTER TABLE atalho ADD COLUMN navegador TEXT"
+        });
+
+        // --- versão 12: agenda ligada ou desligada ---
+        //
+        // Desligada, a agenda some da tela Hoje, não avisa e não sincroniza,
+        // mas continua cadastrada: religar não pede o endereço secreto de novo.
+        lista.add(new String[]{
+                "ALTER TABLE agenda ADD COLUMN ativa INTEGER NOT NULL DEFAULT 1"
+        });
+
         return lista;
     }
 

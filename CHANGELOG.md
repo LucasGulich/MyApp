@@ -7,6 +7,273 @@ e as versões seguem [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
+## [1.21.0] — 2026-11-05
+
+### Adicionado
+
+- **Régua de leitura (Úteis).** Uma faixa translúcida que fica por cima de
+  qualquer programa, para marcar a linha de um relatório. Arrasta-se pelo meio
+  para mover e pelas bordas para redimensionar; Esc ou o botão direito
+  desligam. Altura, largura, opacidade (5 % a 90 %) e cor ficam no bloco e
+  são lembrados, com o lugar onde a faixa estava. Liga e desliga em
+  Configurações → Exibição, sob o Úteis. Não aparece na barra de tarefas.
+  Limite: a faixa captura o clique do mouse. Ainda sem atalho global de
+  teclado. Ver `docs/UTEIS.md`.
+
+## [1.20.0] — 2026-10-30
+
+### Adicionado
+
+- **Busca na agenda da tela Início.** Um campo ao lado do ⟳ procura por
+  título, descrição e local nos lembretes e nas agendas do Google, de 2 anos
+  atrás até 1 ano à frente. Serve para achar "a folga do mês passado" sem
+  lembrar o dia: digitar "folga" lista tudo que tem esse nome, com a data
+  completa (dia da semana e ano) e, nos eventos de vários dias, até quando
+  vão. Ignora acento e maiúscula; com várias palavras, exige todas. O que já
+  passou não fica apagado nos resultados. Esc ou ✕ voltam à agenda, e o Ctrl+F
+  leva o cursor ao campo. Um seletor **Mais recentes | Mais antigas** ordena
+  os resultados por data (padrão: mais recente primeiro), sem refazer a
+  busca. Com o aplicativo trancado, o que é protegido fica de
+  fora. Regra em `InicioService.buscar`, com testes
+  (`InicioServiceBuscaTest`). Ver `docs/INICIO.md`.
+
+### Corrigido
+
+- **O link do download de vídeos (Úteis → Baixar do YouTube) agora tem o ✕ e
+  o Esc** para apagar, como os outros campos. Usa o `CampoBusca`, que ganhou
+  a opção de não atender o Ctrl+F (`new CampoBusca(texto, false)`), `setText`
+  e `limpar`.
+
+## [1.19.1] — 2026-10-27
+
+### Adicionado
+
+- **Selo e botão para lembretes na tela Início.** O evento do Google tinha o
+  "G" e o **Entrar**; o lembrete não tinha nenhum dos dois. Agora ele mostra
+  um sino no mesmo lugar do "G", e um botão quando tem o que abrir: o campo
+  "Abrir junto com o alerta" ou, se estiver vazio, um link do Meet, Zoom ou
+  Teams na descrição ou no título. Sala de reunião vira **Entrar**; outro
+  link, pasta ou arquivo vira **Abrir**. Se não abrir, aparece um aviso de
+  erro (antes a falha só ia para o log).
+
+### Alterado
+
+- A busca do link de reunião saiu de `ArquivoIcs` e foi para
+  `core.Links.linkDeReuniao`, usada pelos eventos e pelos lembretes.
+
+---
+
+## [1.19.0] — 2026-10-22
+
+### Adicionado
+
+- **Ligar e desligar uma agenda** em Configurações → Agendas, sem precisar
+  excluir e cadastrar de novo. Desligada, ela continua na lista (com o nome
+  esmaecido), mas some da tela Hoje, não avisa e não sincroniza. Religar
+  não pede o endereço secreto outra vez e já sincroniza na hora. O botão
+  de sincronizar da tela inicial considera só as ligadas. Migração 12
+  (coluna `ativa`). Ver `docs/AGENDAS.md`.
+
+---
+
+## [1.18.1] — 2026-10-16
+
+### Corrigido
+
+- **Destaque vazando pelos cantos das listas.** Nos campos de escolha (Banco,
+  navegador, grupo, qualidade…), o azul de onde está o mouse era um retângulo
+  de ponta a ponta, e no primeiro e no último item passava pelos cantos
+  arredondados da lista. Agora a lista tem respiro por dentro, o destaque
+  tem canto redondo, e o item já escolhido fica num azul suave. Vale para
+  todas as listas do app.
+- **O mesmo no calendário de escolher data:** a faixa do mês e os dias dos
+  cantos vazavam. A faixa ficou arredondada e por dentro, e os dias perderam
+  a grade de planilha — cada um é um botãozinho arredondado, com hoje em
+  contorno azul e o escolhido em azul cheio.
+
+---
+
+## [1.18.0] — 2026-10-16
+
+### Adicionado
+
+- **Úteis → Formatar SQL.** Cole a consulta grudada e ela sai em linhas,
+  recuada e colorida. Banco (PostgreSQL, MySQL/MariaDB, Oracle, SQL Server,
+  SQL padrão), palavras-chave em MAIÚSCULAS, minúsculas ou como vieram, e
+  recuo de 4 ou 2 espaços ou tab. **Compactar numa linha** para colar em
+  código ou chamado. **Preenche os `?`**: colando o trecho do log do
+  Hibernate inteiro (consulta + "binding parameter"), os valores entram
+  sozinhos, com aspas onde precisa; ou digite os valores à mão. Também
+  `$1`, `$2`. Ctrl+Enter formata. Ver `docs/UTEIS.md`.
+- Biblioteca **sql-formatter 2.0.5** (MIT, ~100 KB, sem dependências).
+  Ver decisão 54.
+
+### Alterado
+
+- `DestacadorSintaxe` saiu das Notas para `ui`: agora colore também o
+  resultado do Formatar SQL.
+
+---
+
+## [1.17.0] — 2026-10-16
+
+### Adicionado
+
+- **Úteis → Gerador de senha.** O mesmo gerador do campo de senha das notas,
+  solto: senha aleatória ou frase-senha, tamanho, o que incluir e a força.
+  Copiar avisa e a senha some da área de transferência em 30 s. Liga e
+  desliga em Configurações → Exibição, sob o Úteis.
+- **`ui.GeradorSenhaForm`**: os controles e a regra do gerador, usados pelo
+  diálogo das notas e pelo bloco do Úteis.
+
+### Alterado
+
+- No gerador (nos dois lugares): formato em pílulas *Senha aleatória |
+  Frase-senha* no lugar dos botões redondos; no modo frase, o tamanho mostra
+  "N palavras" (dizia "caracteres"); copiar agora mostra o aviso.
+
+---
+
+## [1.16.0] — 2026-10-14
+
+### Adicionado
+
+- **Navegador preferido do MyApp**, em Configurações → Sistema. Vale para
+  **todo link que o app abre**: "Entrar" na reunião (tela inicial, alerta e
+  detalhes do evento), link e endereço das notas, ação de lembrete e
+  atalhos de site. Ordem de quem manda: o navegador escolhido no atalho →
+  a preferência do MyApp → o padrão do Windows. No cadastro de atalho, a
+  primeira opção virou "Preferência do MyApp (Google Chrome)", dizendo qual
+  é a preferência agora.
+- **`core.Links`**: o único lugar que abre endereço da web. Os seis pontos do
+  app que chamavam o navegador cada um do seu jeito passam por ele.
+- **`ui.SeletorNavegador`** e **`ui.IconeDoWindows`**: a lista de navegadores
+  com ícones e a extração do ícone do Windows viraram peças comuns
+  (Configurações e atalhos).
+
+### Alterado
+
+- `Navegadores` saiu do módulo Atalhos para `ui`, porque agora as
+  Configurações também usam.
+- A lista de navegadores é lida do registro já na abertura do MyApp, em
+  segundo plano: Configurações e cadastro abrem sem esperar.
+
+---
+
+## [1.15.0] — 2026-10-14
+
+### Adicionado
+
+- **Atalho de site com navegador escolhido.** No cadastro, "Abrir com" lista
+  o padrão do Windows e os navegadores instalados (Chrome, Edge, Firefox,
+  Opera...), cada um com o seu ícone. O bloco ganha o ícone do navegador
+  pequeno no canto, e o balão diz "abre no …". Se o navegador for
+  desinstalado, abrir avisa e pede para escolher outro.
+
+---
+
+## [1.14.0] — 2026-10-14
+
+### Adicionado
+
+- **Módulo Atalhos.** Programas, pastas, sites e arquivos a um clique,
+  separados em grupos ("Aplicativos do dia a dia", "Sites do dia a dia",
+  "Pastas na rede" já vêm criados). Ver `docs/ATALHOS.md`.
+  - **Ícone de verdade**: o do programa ou da pasta, tirado do Windows; o do
+    site (favicon); ou um símbolo do MyApp com cor, ou uma imagem sua.
+  - **Arrastar do Explorador ou do navegador** para um grupo cria o atalho,
+    com nome e ícone automáticos. Vários de uma vez.
+  - Busca sem acento, com **Enter abrindo o primeiro**; botão direito com
+    editar, mostrar na pasta, copiar caminho, mover de grupo e excluir;
+    arrastar para reordenar blocos e grupos.
+  - Colar um caminho no cadastro já acerta o tipo, sugere o nome e mostra o
+    ícone.
+- **`ui.SeletorSimbolo`**: a grade de símbolos das categorias virou peça
+  comum (categorias e atalhos). Dois símbolos novos no catálogo: grade e globo.
+- **`CampoBusca.aoApertarEnter`**.
+
+---
+
+## [1.13.1] — 2026-10-14
+
+### Corrigido
+
+- **"Abrir" e "Mostrar na pasta" abriam Documentos.** O "Mostrar na pasta"
+  mandava o caminho grudado no `/select,` e o Java punha aspas em volta de
+  tudo; o Explorador não reconhecia e abria a pasta padrão. Agora vai
+  `/select, "caminho"`, como o Explorador espera. O "Abrir" passou a usar a
+  abertura padrão do Windows (a do duplo clique), que não se confunde com
+  vírgula no nome do vídeo.
+- **Arquivo renomeado ou movido depois do download:** em vez de cair em
+  Documentos, o MyApp avisa que não achou e abre a pasta onde ele estava.
+- **"Sobrescrever o histórico" deixava o histórico quase intacto.** O Win+V
+  não guarda repetidos, então "." e ".." alternados viravam só dois itens.
+  Agora são 25 textos diferentes: ".", "..", "...", até 25 pontos. E com
+  0,7 s entre uma cópia e outra (antes 150 ms): rápido demais, o Win+V
+  deixava passar parte delas. As 25 levam uns 18 s.
+
+---
+
+## [1.13.0] — 2026-10-14
+
+### Adicionado
+
+- **Escolher as ferramentas do Úteis.** Em Configurações → Exibição, "Área de
+  transferência" e "Baixar do YouTube" ficam penduradas sob o Úteis, cada uma
+  com a sua chave. Com o Úteis desligado, elas esmaecem e guardam a escolha;
+  com as duas desligadas, a tela diz onde religar. Bloco desligado nem é
+  montado: o baixador desligado não procura o yt-dlp.
+- **Úteis → Área de transferência.** *Limpar o que está copiado* esvazia o
+  Ctrl+C; *Sobrescrever o histórico* copia 25 textos de pontos diferentes, o
+  tamanho do histórico do Win+V, para não sobrar nada antigo nele.
+- **Úteis → Baixar do YouTube**, com o yt-dlp por baixo. Cole o link e o MyApp
+  mostra capa, título, canal e duração; escolha **vídeo** (melhor ou 2160p a
+  360p, só as que o vídeo tem, sempre em MP4) ou **só o áudio** (MP3 ou M4A,
+  máxima, 192 ou 128 kbps). Barra com velocidade e tempo restante, Cancelar
+  que limpa os restos, e no fim *Abrir* / *Mostrar na pasta*.
+  - **Pasta fixa** para os downloads, escolhida uma vez e gravada.
+  - Playlist inteira (opcional) numa pasta com o nome dela; capa e dados
+    gravados dentro do arquivo.
+  - **Instalar** yt-dlp, FFmpeg e Deno pelo próprio MyApp num PC que não tem,
+    com conferência SHA-256, e **Atualizar** o yt-dlp com um clique.
+    Quem já instalou pelo `winget` não baixa nada. Ver `docs/UTEIS.md`.
+- **`ui.Opcao` e `ui.ListaOpcoes`**: a chave liga/desliga em linha e o cartão
+  que agrupa várias, como componentes globais.
+
+### Alterado
+
+- **A chave liga/desliga virou o padrão do app inteiro.** Toda caixa de
+  seleção virou chave: Configurações (Segurança, Sistema, Backup), proteger
+  lembrete/nota/cartão, esconder categoria, opções da agenda do Google,
+  "parar de repetir em", tocar som, o gerador de senhas e o "Mostrar
+  arquivados" do Kanban. O texto de apoio que falava em "marcar" agora fala
+  em "ligar".
+
+## [1.12.0] — 2026-10-14
+
+### Adicionado
+
+- **Escolher o que aparece no menu.** A aba "Aparência" das Configurações
+  virou **"Exibição"**: o *Tema* em cima e, embaixo, o *Menu lateral* — um
+  cartão com uma chave liga/desliga por módulo (Lembretes, Kanban, Notas,
+  Úteis). A linha inteira é clicável, e o balão conta o que é cada tela.
+  Desligado, o módulo sai do menu na hora do Salvar; nada é apagado, e
+  lembretes fora do menu continuam avisando. O **Início** aparece ligado,
+  mas esmaecido e sem responder: está sempre no menu.
+- **Chave liga/desliga** (`ui.Interruptor`), componente global para opções
+  que ligam ou desligam algo. Ver `DESIGN.md`.
+- **Ligar e desligar o mural de Recados.** Logo abaixo do Início, pendurado
+  nele por um traço "└", para ler como parte da tela inicial. Desligado, a
+  tela inicial fica só com a agenda; os recados continuam guardados.
+- **Módulo Úteis**, ainda vazio, no menu depois das Notas. É o lugar das
+  ferramentas do dia a dia que vêm a seguir (ver `ROADMAP.md`).
+
+### Alterado
+
+- Um módulo escondido não abre nem a pedido de outra tela: no lugar dele
+  vem o Início. Pelo mesmo motivo, o "Criar um lembrete" do dia vazio some
+  quando Lembretes está fora do menu.
+
 ## [1.11.2] — 2026-10-06
 
 ### Adicionado

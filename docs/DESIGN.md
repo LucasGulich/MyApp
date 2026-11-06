@@ -19,6 +19,7 @@
 | [Busca](#busca) | `ui/CampoBusca.java`, `core/Texto.java` |
 | [Estado vazio](#estado-vazio) | `ui/EstadoVazio.java` |
 | [Texto que se seleciona](#texto-que-se-seleciona) | `ui/TextoSelecionavel.java` |
+| [Chave liga/desliga](#chave-ligadesliga) | `ui/Opcao.java`, `ui/ListaOpcoes.java`, `ui/Interruptor.java` |
 | [Arrastar para reordenar](#arrastar) | `ui/Arrastavel.java` |
 
 ---
@@ -373,6 +374,13 @@ solto:
   aberta. Quem atende é o próprio componente, procurando na cena — uma tela
   nova com busca não precisa registrar nada.
 
+O **X e o Esc valem para qualquer campo de texto de uma linha** que a pessoa
+costuma apagar para colar outra coisa, e não só para buscas: o link do
+download de vídeos usa o componente por isso. Nesse caso, passe `false` no
+segundo parâmetro — `new CampoBusca("Cole o link...", false)` —, e o Ctrl+F não
+leva o cursor para ele (ali o campo não é uma busca). O Enter é
+`aoApertarEnter`, e `setText`/`limpar` mexem no texto de fora.
+
 A comparação fica em `core.Texto.contem`, que **ignora acentos e
 maiúsculas**. Filtrar com `toLowerCase().contains()` à mão faria "agua" não
 achar "Água" de novo.
@@ -443,6 +451,50 @@ Regras:
   ╰──────────────────────────────────────────────────────────────╯
 ```
 
+## Chave liga/desliga
+
+É o padrão do app para **toda** opção que liga ou desliga — não há mais caixa de
+seleção (decisão 48). Três peças:
+
+| Peça | O que é |
+|---|---|
+| `Interruptor` | Só a chave, trilho e bolinha |
+| `Opcao` | A linha: ícone, nome, campos extras e a chave. Responde como a `CheckBox` (`isSelected`, `selectedProperty`...) |
+| `ListaOpcoes` | O cartão que agrupa as linhas, com traço fino entre elas |
+
+```java
+Opcao som = new Opcao(Icone.Simbolo.SOM, "Tocar som")
+        .comDescricao("O que aparece no balão")
+        .comExtra(botaoOuvir);          // fica na linha, desabilitado com a chave desligada
+secao.com(new ListaOpcoes(som, outra));
+```
+
+```
+  ╭──────────────────────────────────────────────╮
+  │  ⌂  Início                          (●══)    │  ← travada: ligada, esmaecida
+  │   └ ▢ Recados                       (══●)    │  ← sub-opção, pendurada
+  │──────────────────────────────────────────────│
+  │  ▥  Kanban                          (●  )    │  ← desligada: nome esmaece
+  ╰──────────────────────────────────────────────╯
+```
+
+- **A linha inteira é clicável**, não só a chave (menos os campos de `comExtra`); o balão (`Botoes.instalarDica`)
+  diz o que é cada opção, em vez de texto miúdo ao lado do nome.
+- **`travar()`** é para o que está sempre ativo: ligada, linha a 50 %, sem
+  resposta. Não usa `setDisable`, que apagaria também o balão.
+- **Só a troca feita pelo usuário desliza.** A que vem do código (carregar a
+  tela) já nasce no lugar — senão a chave "pula" ao abrir o diálogo.
+- **Depende de outra** (as ferramentas do Úteis sob o Úteis): `dependeDe(pai)`
+  esmaece e trava a linha enquanto a de cima está desligada, sem perder a escolha.
+- **Indisponível agora** (proteger com o app trancado): `setDisable(true)` — a
+  linha fica a 45 %. Diferente de `travar()`, que é "sempre ligado".
+- **Solta, fora de cartão** (o "Mostrar arquivados" no cabeçalho do Kanban): a
+  classe `solta` encolhe o espaçamento.
+- Dentro de uma `Secao` o cartão sobe um tom (`-cor-superficie-alta`) para se
+  separar dela.
+- Classes no CSS: `.interruptor`, `.lista-opcoes`, `.linha-opcao`
+  (`.desligada`, `.travada`, `.sub-opcao`, `.solta`), `.ramo-opcao`, `.divisor-opcao`.
+
 ## Texto que se seleciona
 
 `TextoSelecionavel.java` põe seleção com o mouse, Ctrl+C, Ctrl+A e menu de
@@ -468,7 +520,7 @@ encolher, sai de cena por inteiro e ganha um botão para voltar.
 | Coluna de categorias | Some abaixo de 900 px, com botão para trazer de volta |
 | Linhas de botões | `FlowPane`, para quebrar linha em vez de cortar o último |
 
-### Três armadilhas de alinhamento, já pagas
+### Armadilhas de alinhamento, já pagas
 
 **CSS vence o setter.** `-fx-alignment` numa folha de estilo prevalece sobre
 `setAlignment()` chamado no código. Quem alinha diferente em um estado tem que
@@ -483,6 +535,15 @@ rótulo.
 `-fx-border-color` e `-fx-border-width` precisam apontar para o mesmo lado. Cor
 numa aresta de espessura zero não dá erro nenhum: simplesmente não aparece, e
 o defeito pode passar versões sem ser notado.
+
+**Destaque dentro de caixa arredondada precisa de respiro.** Lista que abre de
+um campo de escolha, calendário, menu do botão direito: o fundo tem canto
+redondo, e o destaque de um item, se for retângulo de ponta a ponta, vaza pelos
+cantos no primeiro e no último. A regra do app: **a caixa tem `-fx-padding`
+(5–6 px) e o item destacado tem `-fx-background-radius` (7 px)**. E as regras
+do item escolhido e com foco precisam de seletor do mesmo tamanho dos do
+estilo padrão do JavaFX (`.list-view:focused > .virtual-flow > ... > .list-cell:filled:selected`),
+senão perdem para eles e o quadrado azul volta (v1.18.1).
 
 > **A armadilha do `BorderPane`.** Ele entrega a largura *preferida* aos painéis
 > da esquerda e da direita, e espreme o do meio. Se o do meio tiver largura
@@ -512,6 +573,14 @@ uma barra azul mostra de que lado ele vai entrar.
 | `ui/CampoBusca.java` | Campo de busca com X, Esc e Ctrl+F |
 | `ui/TextoSelecionavel.java` | Seleção e cópia sobre texto colorido |
 | `ui/EstadoVazio.java` | O que a tela mostra quando não há nada |
+| `ui/Interruptor.java` | A chave liga/desliga |
+| `ui/SeletorSimbolo.java` | A grade de símbolos do catálogo (categorias, atalhos) |
+| `ui/SeletorNavegador.java` | A lista de navegadores instalados, com ícone (Configurações, atalhos) |
+| `ui/GeradorSenhaForm.java` | O gerador de senhas (diálogo das notas e bloco do Úteis) |
+| `ui/DestacadorSintaxe.java` | O colorido de código (notas de código, Formatar SQL) |
+| `ui/IconeDoWindows.java` | O ícone que o Explorador mostra para um programa, pasta ou arquivo |
+| `ui/Opcao.java` | Uma opção liga/desliga em linha — no lugar da caixa de seleção |
+| `ui/ListaOpcoes.java` | O cartão que agrupa as opções |
 | `core/Texto.java` | Comparação sem acento, de toda busca |
 | `ui/Arrastavel.java` | Reordenação por arrasto |
 | `ui/BarraTitulo.java` | A barra de título própria, que segue o tema |

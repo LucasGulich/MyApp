@@ -153,6 +153,24 @@ fazendo — os identificadores estão ali para serem lidos.
 Para levar um backup para fora, use **Exportar agora com senha própria**. Aí
 sim a proteção é a mesma do resto do aplicativo.
 
+## Programas baixados pelo MyApp (Úteis → YouTube)
+
+O baixador roda três programas de fora — yt-dlp, FFmpeg e Deno. Quando faltam,
+o MyApp os baixa. Isso é rodar código que não é dele, então as regras são:
+
+| Regra | Como |
+|---|---|
+| Só de uma origem | A página oficial de lançamentos de cada projeto no GitHub; os endereços são fixos no código (`Ferramenta`) |
+| Conferido antes de virar executável | Baixa para um temporário, calcula o SHA-256 no caminho e compara com a lista de somas publicada pelo projeto. Diferente: apaga e não instala |
+| Do `.zip`, só o que se pediu | Tira só `ffmpeg.exe`, `ffprobe.exe` e `deno.exe`, e grava pelo nome-base — um nome com `..` dentro do zip não escapa da pasta |
+| Sem administrador, sem PATH | Vão para `%LOCALAPPDATA%\MyApp\ferramentas`; o Windows não muda |
+| O link não vira opção | O link vai depois de `--` na linha de comando, e o processo é chamado sem `cmd` no meio: um "link" como `--exec calc` é só um link inválido |
+
+**O que a soma não cobre:** ela vem do mesmo lugar que o arquivo. Se a conta do
+projeto no GitHub fosse comprometida, arquivo e soma mudariam juntos. Protege
+contra download cortado, proxy que troca conteúdo e espelho falso — não contra
+o próprio projeto. É a mesma confiança de quem roda `winget install yt-dlp`.
+
 ## O que este desenho não protege
 
 Vale ser claro, porque segurança mal compreendida é pior que nenhuma:

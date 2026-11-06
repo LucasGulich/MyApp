@@ -9,6 +9,7 @@ import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.CampoBusca;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.EstadoVazio;
+import br.com.myapp.ui.DestacadorSintaxe;
 import br.com.myapp.ui.Icone;
 import br.com.myapp.ui.Secao;
 import br.com.myapp.ui.TextoSelecionavel;

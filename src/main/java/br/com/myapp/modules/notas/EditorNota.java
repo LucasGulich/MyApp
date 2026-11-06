@@ -6,13 +6,15 @@ import br.com.myapp.security.SecurityService;
 import br.com.myapp.ui.AreaTransferencia;
 import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.Dialogos;
+import br.com.myapp.ui.DestacadorSintaxe;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.ListaOpcoes;
+import br.com.myapp.ui.Opcao;
 import br.com.myapp.ui.Secao;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -53,7 +55,7 @@ public class EditorNota {
     private final ComboBox<TipoNota> campoTipo = new ComboBox<>();
     private final ComboBox<Categoria> campoCategoria = new ComboBox<>();
     private final TextArea campoCorpo = new TextArea();
-    private final CheckBox campoProtegida = new CheckBox("Proteger esta nota com a senha mestra");
+    private final Opcao campoProtegida = new Opcao(Icone.Simbolo.CADEADO, "Proteger esta nota com a senha mestra");
 
     // --- campos do tipo, montados conforme a escolha ---
     private final Map<String, TextField> camposComuns = new LinkedHashMap<>();
@@ -208,16 +210,15 @@ public class EditorNota {
     }
 
     private Secao montarSecaoSeguranca() {
-        campoProtegida.setTooltip(new Tooltip(
-                "Título, conteúdo e campos ficam cifrados e só aparecem com o app destrancado."));
+        campoProtegida.comDescricao("Título, conteúdo e campos ficam cifrados e só aparecem com o app destrancado.");
         campoProtegida.setDisable(!SecurityService.estaDestrancado());
         if (!SecurityService.estaDestrancado()) {
             campoProtegida.setText("Proteger com a senha mestra (destranque o app para usar)");
         }
 
         return new Secao(Icone.Simbolo.ESCUDO, "SEGURANÇA",
-                campoProtegida,
-                Secao.dica("Campos de senha são cifrados sempre, mesmo sem marcar esta opção."));
+                new ListaOpcoes(campoProtegida),
+                Secao.dica("Campos de senha são cifrados sempre, mesmo com esta opção desligada."));
     }
 
     // ------------------------------------------------- campos por tipo

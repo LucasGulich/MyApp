@@ -302,6 +302,29 @@ class AgendaFluxoTest {
         assertNotNull(colunaCrua(a.getId(), "data_exclusao"));
     }
 
+    @Test
+    @DisplayName("Desligar esconde da tela e para de sincronizar; religar volta sem pedir o link")
+    void desligarELigar() throws Exception {
+        resposta = agendaPadrao();
+        Agenda a = conectar("Trabalho", false);
+        assertTrue(AgendaService.sincronizar(a.getId()));
+
+        AgendaService.ativar(a.getId(), false);
+
+        assertEquals(1, AgendaService.listar().size(), "continua cadastrada nas configurações");
+        assertFalse(AgendaService.listar().get(0).isAtiva());
+        assertTrue(AgendaService.listarAtivas().isEmpty());
+        assertFalse(titulosDosProximos().contains("Reunião com o cliente"));
+        assertTrue(new InicioService().diaInteiroDeHoje().isEmpty());
+        assertFalse(AgendaService.sincronizar(a.getId()), "desligada não sincroniza");
+
+        AgendaService.ativar(a.getId(), true);
+
+        assertTrue(AgendaService.porId(a.getId()).orElseThrow().isAtiva());
+        assertTrue(titulosDosProximos().contains("Reunião com o cliente"));
+        assertTrue(AgendaService.sincronizar(a.getId()));
+    }
+
     // -------------------------------------------------------------- testar
 
     @Test

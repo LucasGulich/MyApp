@@ -2,12 +2,12 @@ package br.com.myapp.modules.lembretes;
 
 import br.com.myapp.core.Config;
 import br.com.myapp.core.EventBus;
+import br.com.myapp.core.Links;
 import br.com.myapp.core.Log;
 import br.com.myapp.core.Scheduler;
 
 import java.awt.Desktop;
 import java.io.File;
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -249,23 +249,48 @@ public class LembreteService {
      * sala, ou "rodar deploy" em um atalho para o script.
      */
     public void executarAcao(Lembrete lembrete) {
+        abrirAlvo(lembrete.getAcao(), lembrete.getId());
+    }
+
+    /**
+     * O que o botão da tela inicial abre: o campo "Abrir junto com o alerta",
+     * ou, se ele estiver vazio, a sala de reunião (Meet, Zoom, Teams) colada
+     * na descrição ou no título.
+     */
+    public Optional<String> oQueAbrir(Lembrete lembrete) {
         String acao = lembrete.getAcao();
-        if (acao == null || acao.isBlank()) {
-            return;
+        if (acao != null && !acao.isBlank()) {
+            return Optional.of(acao.trim());
+        }
+        return Links.linkDeReuniao(lembrete.getDescricao())
+                .or(() -> Links.linkDeReuniao(lembrete.getTitulo()));
+    }
+
+    /**
+     * Abre um link, uma pasta, um arquivo ou um programa.
+     *
+     * @return false se não deu: caminho que não existe, link inválido
+     */
+    public boolean abrirAlvo(String alvo, Long lembreteId) {
+        if (alvo == null || alvo.isBlank()) {
+            return false;
         }
         try {
-            if (acao.startsWith("http://") || acao.startsWith("https://")) {
-                Desktop.getDesktop().browse(new URI(acao.trim()));
-            } else {
-                File alvo = new File(acao.trim());
-                if (alvo.exists()) {
-                    Desktop.getDesktop().open(alvo);
-                } else {
-                    Log.aviso("A ação do lembrete aponta para algo que não existe.");
-                }
+            String a = alvo.trim();
+            if (a.startsWith("http://") || a.startsWith("https://")) {
+                Links.abrir(a);
+                return true;
             }
+            File arquivo = new File(a);
+            if (arquivo.exists()) {
+                Desktop.getDesktop().open(arquivo);
+                return true;
+            }
+            Log.aviso("A ação do lembrete aponta para algo que não existe.");
+            return false;
         } catch (Exception e) {
-            Log.erro("Falha ao executar a ação do lembrete " + lembrete.getId(), e);
+            Log.erro("Falha ao executar a ação do lembrete " + lembreteId, e);
+            return false;
         }
     }
 

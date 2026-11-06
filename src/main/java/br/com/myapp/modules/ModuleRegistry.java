@@ -1,10 +1,13 @@
 package br.com.myapp.modules;
 
+import br.com.myapp.core.Config;
 import br.com.myapp.core.Log;
+import br.com.myapp.modules.atalhos.AtalhosModule;
 import br.com.myapp.modules.inicio.InicioModule;
 import br.com.myapp.modules.kanban.KanbanModule;
 import br.com.myapp.modules.lembretes.LembretesModule;
 import br.com.myapp.modules.notas.NotasModule;
+import br.com.myapp.modules.uteis.UteisModule;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,8 +35,6 @@ public final class ModuleRegistry {
      * conforme cada um for escrito:
      *
      *   registrar(new TarefasModule());       // lista de tarefas
-     *   registrar(new KanbanModule());        // quadro visual
-     *   registrar(new FerramentasModule());   // JSON, base64, hash, datas
      *   registrar(new AtendimentosModule());  // diário de chamados
      */
     public static void registrarPadroes() {
@@ -41,6 +42,8 @@ public final class ModuleRegistry {
         registrar(new LembretesModule());
         registrar(new KanbanModule());
         registrar(new NotasModule());
+        registrar(new AtalhosModule());
+        registrar(new UteisModule());
     }
 
     public static void registrar(AppModule modulo) {
@@ -51,6 +54,33 @@ public final class ModuleRegistry {
 
     public static List<AppModule> todos() {
         return List.copyOf(MODULOS);
+    }
+
+    /**
+     * Está no menu lateral?
+     *
+     * Quem não pode ser ocultado responde sim mesmo que o id tenha ido parar
+     * na lista de ocultos — por um config.json editado à mão, por exemplo.
+     */
+    public static boolean estaVisivel(AppModule modulo) {
+        return !modulo.podeOcultar() || !Config.get().modulosOcultos.contains(modulo.id());
+    }
+
+    public static boolean estaVisivel(String id) {
+        return porId(id).map(ModuleRegistry::estaVisivel).orElse(false);
+    }
+
+    /** Os módulos que aparecem no menu, na ordem do menu. */
+    public static List<AppModule> visiveis() {
+        return MODULOS.stream().filter(ModuleRegistry::estaVisivel).toList();
+    }
+
+    /**
+     * Publicado quando muda o que aparece na tela: módulos do menu ou blocos
+     * opcionais de uma tela, como o mural de recados. Quem desenha escuta e
+     * se ajusta na hora, sem precisar reabrir o app.
+     */
+    public record ExibicaoMudou() {
     }
 
     public static Optional<AppModule> porId(String id) {

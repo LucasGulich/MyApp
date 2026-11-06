@@ -314,7 +314,7 @@ public class PopupAlerta {
     private static void abrirNoNavegador(String link) {
         new Thread(() -> {
             try {
-                java.awt.Desktop.getDesktop().browse(java.net.URI.create(link));
+                br.com.myapp.core.Links.abrir(link);
             } catch (Exception e) {
                 Log.aviso("Não foi possível abrir o link da reunião: " + e.getMessage());
             }

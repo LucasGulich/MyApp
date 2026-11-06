@@ -7,13 +7,13 @@ import br.com.myapp.ui.Botoes;
 import br.com.myapp.ui.Dialogos;
 import br.com.myapp.ui.EstadoVazio;
 import br.com.myapp.ui.Icone;
+import br.com.myapp.ui.Opcao;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.ClipboardContent;
@@ -84,7 +84,7 @@ public class KanbanView extends BorderPane {
      */
     private ScrollPane rolagem;
     private final Label contador = new Label();
-    private final CheckBox mostrarArquivados = new CheckBox("Mostrar arquivados");
+    private final Opcao mostrarArquivados = new Opcao("Mostrar arquivados");
 
     /** Guardado entre desenhos para o quadro não se reorganizar sozinho. */
     private List<ColunaKanban> colunas = List.of();
@@ -115,9 +115,9 @@ public class KanbanView extends BorderPane {
         Region espaco = new Region();
         HBox.setHgrow(espaco, Priority.ALWAYS);
 
-        mostrarArquivados.setOnAction(e -> recarregar());
-        Botoes.instalarDica(mostrarArquivados,
-                "Cartões arquivados ficam escondidos. Ligue para revê-los.");
+        mostrarArquivados.getStyleClass().add("solta");
+        mostrarArquivados.comDescricao("Cartões arquivados ficam escondidos. Ligue para revê-los.");
+        mostrarArquivados.selectedProperty().addListener((obs, antes, agora) -> recarregar());
 
         Button novaColuna = Botoes.primario("Nova coluna", Icone.Simbolo.ADICIONAR);
         novaColuna.setOnAction(e -> abrirEditorDeColuna(null));

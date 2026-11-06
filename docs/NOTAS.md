@@ -240,7 +240,7 @@ versões anteriores de um campo.
 | `EditorNota` | O formulário, que se remonta conforme o tipo |
 | `DialogoCategoria` | Criar e editar categoria |
 | `DialogoGeradorSenha` | O gerador |
-| `DestacadorSintaxe` | O colorido do código |
+| `ui.DestacadorSintaxe` | O colorido do código (também usado pelo Formatar SQL do Úteis) |
 | `GeradorSenha` | A geração em si (em `security`, para servir a outros módulos) |
 | `AreaTransferencia` | Cópia com limpeza automática (em `ui`) |
 

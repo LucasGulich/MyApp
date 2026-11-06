@@ -31,9 +31,28 @@ public interface AppModule {
      */
     Icone.Simbolo icone();
 
+    /**
+     * Uma frase sobre o que a tela faz, mostrada no balão ao passar o mouse
+     * pelo módulo em Configurações &gt; Exibição.
+     */
+    default String descricao() {
+        return "";
+    }
+
     /** Ordem no menu lateral. Menor aparece antes. */
     default int ordem() {
         return 100;
+    }
+
+    /**
+     * Pode ser tirado do menu em Configurações &gt; Exibição?
+     *
+     * A tela inicial responde não: é a que abre depois da senha e a que
+     * sobra quando todo o resto está escondido. Sem ela, o app poderia
+     * ficar sem nenhuma tela para mostrar.
+     */
+    default boolean podeOcultar() {
+        return true;
     }
 
     /**

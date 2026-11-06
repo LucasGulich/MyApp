@@ -39,8 +39,20 @@ public class CampoBusca extends StackPane {
 
     private final TextField campo = new TextField();
     private final Button limpar = new Button();
+    private final boolean atendeCtrlF;
 
     public CampoBusca(String textoDeApoio) {
+        this(textoDeApoio, true);
+    }
+
+    /**
+     * @param atendeCtrlF se o Ctrl+F da janela leva o cursor para este campo.
+     *                    Falso para quem usa o componente só pelo X e pelo Esc,
+     *                    como o link do download de vídeos: ali o campo não é
+     *                    uma busca, e o Ctrl+F não deve ir parar nele.
+     */
+    public CampoBusca(String textoDeApoio, boolean atendeCtrlF) {
+        this.atendeCtrlF = atendeCtrlF;
         getStyleClass().add(CLASSE);
 
         campo.setPromptText(textoDeApoio);
@@ -78,10 +90,24 @@ public class CampoBusca extends StackPane {
         return campo.getText() == null ? "" : campo.getText();
     }
 
+    public void setText(String texto) {
+        campo.setText(texto);
+    }
+
+    /** O que fazer com o Enter — nos atalhos, abrir o primeiro encontrado. */
+    public void aoApertarEnter(Runnable acao) {
+        campo.setOnAction(e -> acao.run());
+    }
+
     /** Põe o cursor no campo, com o texto já selecionado para ser trocado. */
     public void focar() {
         campo.requestFocus();
         campo.selectAll();
+    }
+
+    /** Apaga o que foi digitado, sem mexer no foco. */
+    public void limpar() {
+        campo.clear();
     }
 
     private void limparEFocar() {
@@ -107,7 +133,7 @@ public class CampoBusca extends StackPane {
             return false;
         }
         for (Node no : cena.getRoot().lookupAll("." + CLASSE)) {
-            if (no instanceof CampoBusca busca && estaAVista(busca)) {
+            if (no instanceof CampoBusca busca && busca.atendeCtrlF && estaAVista(busca)) {
                 busca.focar();
                 return true;
             }

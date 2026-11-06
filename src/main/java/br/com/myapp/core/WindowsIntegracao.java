@@ -104,6 +104,40 @@ public final class WindowsIntegracao {
      * <b>qual</b> som toca é a preferência geral configurada aqui. Quem chama
      * este método já decidiu que o som deve sair.</p>
      */
+    /** Abre um arquivo ou pasta com o programa padrão do Windows. */
+    public static void abrir(Path alvo) {
+        // Pelo Desktop (o "duplo clique" do Windows), e não pelo explorer.exe:
+        // o Explorador lê vírgula como separador de argumentos, e um nome como
+        // "Música, Artista.mp4" o fazia desistir e abrir Documentos.
+        // Fora da thread da tela: o programa associado pode demorar a subir.
+        Thread t = new Thread(() -> {
+            try {
+                java.awt.Desktop.getDesktop().open(alvo.toFile());
+            } catch (Exception e) {
+                Log.aviso("Não foi possível abrir " + alvo + ": " + e.getMessage());
+            }
+        }, "abrir-arquivo");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /**
+     * Abre o Explorador na pasta do arquivo, com ele já selecionado.
+     *
+     * <p>O caminho vai como argumento à parte e já entre aspas:
+     * {@code explorer.exe /select, "C:\...\arquivo.mp4"}. Passado junto
+     * ({@code "/select,C:\..."}), o Java punha aspas em volta de tudo quando o
+     * nome tinha espaço, o Explorador não reconhecia o {@code /select} e abria
+     * Documentos.
+     */
+    public static void mostrarNaPasta(Path arquivo) {
+        try {
+            new ProcessBuilder("explorer.exe", "/select,", "\"" + arquivo.toAbsolutePath() + "\"").start();
+        } catch (Exception e) {
+            Log.aviso("Não foi possível abrir no Explorador: " + e.getMessage());
+        }
+    }
+
     public static void tocarAlerta() {
         Config config = Config.get();
         new Thread(() -> {

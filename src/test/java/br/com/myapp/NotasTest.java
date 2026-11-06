@@ -5,7 +5,7 @@ import br.com.myapp.core.Config;
 import br.com.myapp.data.Database;
 import br.com.myapp.modules.notas.Categoria;
 import br.com.myapp.modules.notas.CampoNota;
-import br.com.myapp.modules.notas.DestacadorSintaxe;
+import br.com.myapp.ui.DestacadorSintaxe;
 import br.com.myapp.modules.notas.Nota;
 import br.com.myapp.modules.notas.NotaDao;
 import br.com.myapp.modules.notas.NotaService;

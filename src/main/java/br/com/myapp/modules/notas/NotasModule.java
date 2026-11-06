@@ -31,6 +31,11 @@ public class NotasModule implements AppModule {
     }
 
     @Override
+    public String descricao() {
+        return "Anotações, senhas, links e trechos de código, organizados em categorias.";
+    }
+
+    @Override
     public Icone.Simbolo icone() {
         return Icone.Simbolo.NOTA;
     }

@@ -4,14 +4,16 @@ import br.com.myapp.agendas.PainelAgendas;
 import br.com.myapp.backup.BackupService;
 import br.com.myapp.core.Config;
 import br.com.myapp.core.Log;
+import br.com.myapp.core.EventBus;
 import br.com.myapp.core.WindowsIntegracao;
+import br.com.myapp.modules.AppModule;
+import br.com.myapp.modules.ModuleRegistry;
 import br.com.myapp.security.SecurityService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -22,6 +24,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -30,7 +33,11 @@ import javafx.util.StringConverter;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Janela de configurações, separada em abas.
@@ -44,12 +51,34 @@ public class TelaConfiguracoes {
     private final Runnable aoTrocarTema;
     private final Config config = Config.get();
 
-    // --- Aparência ---
+    // --- Exibição ---
     private final ComboBox<String> campoTema = new ComboBox<>();
+    /** Uma chave por módulo, pelo id. Os que não podem sair do menu ficam fora. */
+    private final Map<String, Opcao> camposModulos = new LinkedHashMap<>();
+    private final Opcao campoMostrarAreaTransferencia = new Opcao(Icone.Simbolo.COPIAR, "Área de transferência")
+            .comDescricao("Limpar o Ctrl+C e sobrescrever o histórico do Win+V.")
+            .comoSubOpcao();
+    private final Opcao campoMostrarGeradorSenha = new Opcao(Icone.Simbolo.CHAVE, "Gerador de senha")
+            .comDescricao("Senha forte ou frase-senha, pronta para copiar.")
+            .comoSubOpcao();
+    private final Opcao campoMostrarFormatarSql = new Opcao(Icone.Simbolo.CODIGO, "Formatar SQL")
+            .comDescricao("Colar a consulta grudada (ou o log do Hibernate) e receber em linhas, colorida.")
+            .comoSubOpcao();
+    private final Opcao campoMostrarRegua = new Opcao(Icone.Simbolo.REGUA, "Régua de leitura")
+            .comDescricao("Faixa translúcida por cima de qualquer programa, para marcar a linha de um relatório.")
+            .comoSubOpcao();
+    private final Opcao campoMostrarYoutube =new Opcao(Icone.Simbolo.RETOMAR, "Baixar do YouTube")
+            .comDescricao("Baixar vídeo ou só o áudio de um link do YouTube, com o yt-dlp.")
+            .comoSubOpcao();
+    private final Opcao campoMostrarRecados = new Opcao(Icone.Simbolo.RECADO, "Recados")
+            .comDescricao("O mural de bilhetes rápidos, tipo papel adesivo, que fica embaixo "
+                    + "da agenda na tela inicial.")
+            .comoSubOpcao();
 
     // --- Segurança ---
     private final Spinner<Integer> campoInatividade = new Spinner<>(0, 480, 15);
-    private final CheckBox campoBloquearAoMinimizar = new CheckBox("Trancar também ao minimizar para a bandeja");
+    private final Opcao campoBloquearAoMinimizar = new Opcao(Icone.Simbolo.CADEADO, "Trancar também ao minimizar para a bandeja")
+            .comDescricao("Mandar a janela para a bandeja passa a trancar o app, como o Ctrl+L.");
 
     // --- lembretes ---
     private final TextField campoArquivoSom = new TextField();
@@ -57,12 +86,20 @@ public class TelaConfiguracoes {
     private final Spinner<Integer> campoCatchUp = new Spinner<>(0, 60, 7);
 
     // --- sistema ---
-    private final CheckBox campoIniciarComWindows = new CheckBox("Abrir junto com o Windows");
-    private final CheckBox campoIniciarMinimizado = new CheckBox("Começar minimizado na bandeja");
-    private final CheckBox campoFecharVaiParaBandeja = new CheckBox("O botão X minimiza para a bandeja em vez de sair");
+    private final Opcao campoIniciarComWindows = new Opcao(Icone.Simbolo.MONITOR, "Abrir junto com o Windows")
+            .comDescricao("O MyApp abre sozinho quando você entra no Windows.");
+    private final Opcao campoIniciarMinimizado = new Opcao(Icone.Simbolo.JANELA_MINIMIZAR, "Começar minimizado na bandeja")
+            .comDescricao("Abre direto na bandeja, ao lado do relógio, sem mostrar a janela.");
+    private final Opcao campoFecharVaiParaBandeja = new Opcao(Icone.Simbolo.FECHAR, "O botão X minimiza para a bandeja em vez de sair")
+            .comDescricao("Fechar a janela não encerra: o app segue avisando os lembretes. Para sair, use Sair no menu da bandeja.");
+
+    // --- navegador ---
+    /** A preferência geral. A lista lê o registro: criada ao montar a aba, não ao abrir a janela. */
+    private SeletorNavegador campoNavegador;
 
     // --- backup ---
-    private final CheckBox campoBackupAuto = new CheckBox("Gerar backup automático");
+    private final Opcao campoBackupAuto = new Opcao(Icone.Simbolo.NUVEM, "Gerar backup automático")
+            .comDescricao("De tempos em tempos, um arquivo cifrado com todos os dados vai para a pasta escolhida abaixo.");
     private final TextField campoPastaNuvem = new TextField();
     private final Spinner<Integer> campoHorasBackup = new Spinner<>(1, 720, 24);
     private final Spinner<Integer> campoManterBackups = new Spinner<>(1, 200, 15);
@@ -89,7 +126,7 @@ public class TelaConfiguracoes {
         PainelAgendas agendas = new PainelAgendas(dono);
 
         TabPane abas = new TabPane(
-                aba("Aparência", abaAparencia()),
+                aba("Exibição", abaExibicao()),
                 aba("Segurança", abaSeguranca()),
                 aba("Lembretes", abaLembretes()),
                 aba("Agendas", agendas),
@@ -122,7 +159,17 @@ public class TelaConfiguracoes {
 
     // ------------------------------------------------------------ abas
 
-    private VBox abaAparencia() {
+    /**
+     * O que aparece no app: o tema, os módulos do menu e os blocos opcionais
+     * de cada tela.
+     *
+     * A lista sai do {@link ModuleRegistry}, então um módulo novo entra aqui
+     * sem tocar nesta tela. Cada linha inteira liga e desliga, e o balão
+     * conta o que é a tela. O Início vem ligado e esmaecido, sem responder ao
+     * clique: está sempre no menu — sem ele o app poderia ficar sem tela
+     * nenhuma para abrir.
+     */
+    private VBox abaExibicao() {
         campoTema.getItems().addAll("escuro", "claro");
         // "escuro" e "claro" são o valor gravado na configuração e comparado
         // pelo Shell — continuam em minúsculas. Só o que aparece na tela ganha
@@ -143,10 +190,42 @@ public class TelaConfiguracoes {
         campoTema.getStyleClass().add("campo");
         campoTema.setPrefWidth(200);
 
+        ListaOpcoes modulos = new ListaOpcoes();
+        for (AppModule modulo : ModuleRegistry.todos()) {
+            Opcao opcao = new Opcao(modulo.icone(), modulo.nome()).comDescricao(modulo.descricao());
+            if (modulo.podeOcultar()) {
+                camposModulos.put(modulo.id(), opcao);
+            } else {
+                opcao.travar();
+            }
+            modulos.adicionar(opcao);
+
+            // Opções de dentro da tela ficam penduradas sob o módulo, para ler
+            // como "parte do Início", e não como mais um item do menu.
+            if ("inicio".equals(modulo.id())) {
+                modulos.adicionar(campoMostrarRecados);
+            }
+            if ("uteis".equals(modulo.id())) {
+                // Com o Úteis fora do menu, as ferramentas dele não têm onde
+                // aparecer: as chaves esmaecem junto, mas guardam a escolha.
+                modulos.adicionar(campoMostrarAreaTransferencia.dependeDe(opcao));
+                modulos.adicionar(campoMostrarGeradorSenha.dependeDe(opcao));
+                modulos.adicionar(campoMostrarFormatarSql.dependeDe(opcao));
+                modulos.adicionar(campoMostrarRegua.dependeDe(opcao));
+                modulos.adicionar(campoMostrarYoutube.dependeDe(opcao));
+            }
+        }
+
         return new VBox(
                 rotulo("TEMA"),
                 campoTema,
-                explicacao("O tema claro é mais confortável em ambiente muito iluminado."));
+                explicacao("O tema claro é mais confortável em ambiente muito iluminado."),
+                separador(),
+                rotulo("MENU LATERAL"),
+                modulos,
+                explicacao("Desligue o que você não usa para tirar do menu. Nada é apagado: "
+                        + "ligando de novo, tudo volta como estava. Lembretes fora do menu "
+                        + "continuam avisando na hora certa."));
     }
 
     private VBox abaSeguranca() {
@@ -166,7 +245,7 @@ public class TelaConfiguracoes {
                 linhaInatividade,
                 explicacao("Use 0 para desligar o bloqueio automático. "
                         + "Qualquer tecla ou movimento de mouse na janela reinicia a contagem."),
-                campoBloquearAoMinimizar,
+                new ListaOpcoes(campoBloquearAoMinimizar),
                 separador(),
                 rotulo("SENHA MESTRA"),
                 trocarSenha,
@@ -234,15 +313,22 @@ public class TelaConfiguracoes {
     }
 
     private VBox abaSistema() {
+        campoNavegador = new SeletorNavegador("Navegador padrão do Windows");
+
         return new VBox(
+                rotulo("NAVEGADOR"),
+                campoNavegador,
+                explicacao("Onde o MyApp abre os links: \"Entrar\" na reunião, links e endereços das "
+                        + "notas, ação de lembrete e atalhos de site. Um atalho com navegador próprio "
+                        + "vale mais que esta escolha."),
+                separador(),
                 rotulo("INICIALIZAÇÃO"),
-                campoIniciarComWindows,
-                campoIniciarMinimizado,
+                new ListaOpcoes(campoIniciarComWindows, campoIniciarMinimizado),
                 explicacao("A inicialização automática só funciona com o aplicativo instalado. "
                         + "Rodando pelo Maven durante o desenvolvimento, a opção fica sem efeito."),
                 separador(),
                 rotulo("JANELA"),
-                campoFecharVaiParaBandeja,
+                new ListaOpcoes(campoFecharVaiParaBandeja),
                 explicacao("Com esta opção ligada, o aplicativo continua vigiando a agenda depois "
                         + "de você fechar a janela. Para encerrar de verdade, use Sair no menu da bandeja."));
     }
@@ -288,7 +374,7 @@ public class TelaConfiguracoes {
 
         return new VBox(
                 rotulo("BACKUP AUTOMÁTICO"),
-                campoBackupAuto,
+                new ListaOpcoes(campoBackupAuto),
                 linhaPasta,
                 linhaIntervalo,
                 explicacao("O backup automático é cifrado com uma chave derivada desta máquina, para "
@@ -305,6 +391,13 @@ public class TelaConfiguracoes {
 
     private void carregar() {
         campoTema.setValue(config.tema);
+        camposModulos.forEach((id, chave) -> chave.setSelected(!config.modulosOcultos.contains(id)));
+        campoMostrarRecados.setSelected(config.mostrarRecados);
+        campoMostrarAreaTransferencia.setSelected(config.mostrarAreaTransferencia);
+        campoMostrarGeradorSenha.setSelected(config.mostrarGeradorSenha);
+        campoMostrarFormatarSql.setSelected(config.mostrarFormatarSql);
+        campoMostrarRegua.setSelected(config.mostrarRegua);
+        campoMostrarYoutube.setSelected(config.mostrarYoutube);
         campoInatividade.getValueFactory().setValue(config.minutosParaBloquear);
         campoBloquearAoMinimizar.setSelected(config.bloquearAoMinimizar);
 
@@ -315,6 +408,7 @@ public class TelaConfiguracoes {
         campoIniciarComWindows.setSelected(WindowsIntegracao.iniciaComWindows());
         campoIniciarMinimizado.setSelected(config.iniciarMinimizado);
         campoFecharVaiParaBandeja.setSelected(config.fecharVaiParaBandeja);
+        campoNavegador.selecionar(config.navegadorPadrao);
 
         campoBackupAuto.setSelected(config.backupAutomatico);
         campoPastaNuvem.setText(config.pastaBackupNuvem);
@@ -326,6 +420,28 @@ public class TelaConfiguracoes {
         boolean temaMudou = !campoTema.getValue().equals(config.tema);
 
         config.tema = campoTema.getValue();
+
+        Set<String> ocultos = new LinkedHashSet<>();
+        camposModulos.forEach((id, chave) -> {
+            if (!chave.isSelected()) {
+                ocultos.add(id);
+            }
+        });
+        boolean exibicaoMudou = !ocultos.equals(config.modulosOcultos)
+                || campoMostrarRecados.isSelected() != config.mostrarRecados
+                || campoMostrarAreaTransferencia.isSelected() != config.mostrarAreaTransferencia
+                || campoMostrarGeradorSenha.isSelected() != config.mostrarGeradorSenha
+                || campoMostrarFormatarSql.isSelected() != config.mostrarFormatarSql
+                || campoMostrarRegua.isSelected() != config.mostrarRegua
+                || campoMostrarYoutube.isSelected() != config.mostrarYoutube;
+        config.modulosOcultos = ocultos;
+        config.mostrarRecados = campoMostrarRecados.isSelected();
+        config.mostrarAreaTransferencia = campoMostrarAreaTransferencia.isSelected();
+        config.mostrarGeradorSenha = campoMostrarGeradorSenha.isSelected();
+        config.mostrarFormatarSql = campoMostrarFormatarSql.isSelected();
+        config.mostrarRegua = campoMostrarRegua.isSelected();
+        config.mostrarYoutube = campoMostrarYoutube.isSelected();
+
         config.minutosParaBloquear = campoInatividade.getValue();
         config.bloquearAoMinimizar = campoBloquearAoMinimizar.isSelected();
 
@@ -335,6 +451,8 @@ public class TelaConfiguracoes {
 
         config.iniciarMinimizado = campoIniciarMinimizado.isSelected();
         config.fecharVaiParaBandeja = campoFecharVaiParaBandeja.isSelected();
+        boolean navegadorMudou = !campoNavegador.exe().equalsIgnoreCase(config.navegadorPadrao);
+        config.navegadorPadrao = campoNavegador.exe();
 
         config.backupAutomatico = campoBackupAuto.isSelected();
         config.pastaBackupNuvem = campoPastaNuvem.getText() == null ? "" : campoPastaNuvem.getText().trim();
@@ -356,6 +474,15 @@ public class TelaConfiguracoes {
 
         if (temaMudou && aoTrocarTema != null) {
             aoTrocarTema.run();
+        }
+        if (exibicaoMudou) {
+            EventBus.publicar(new ModuleRegistry.ExibicaoMudou());
+        }
+        // Os atalhos de site sem navegador próprio mostram a preferência no cadastro.
+        if (navegadorMudou) {
+            Aviso.sucesso(campoNavegador.exe().isBlank()
+                    ? "Os links vão abrir no navegador padrão do Windows."
+                    : "Os links vão abrir no " + campoNavegador.getValue().nome() + ".");
         }
         Log.info("Configurações salvas.");
     }

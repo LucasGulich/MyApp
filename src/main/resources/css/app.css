@@ -1116,6 +1116,11 @@ Label { -fx-text-fill: -cor-texto; }
    passou é tão útil quanto saber da próxima. */
 .linha-compromisso.passou { -fx-opacity: 0.38; }
 
+/* Agenda desligada nas configurações: só a cor e o nome esmaecem, para a
+   chave e os botões continuarem com cara de clicáveis. */
+.linha-compromisso.desligada .faixa-cor,
+.linha-compromisso.desligada .titulo-compromisso { -fx-opacity: 0.45; }
+
 .linha-compromisso.iminente {
     -fx-border-color: -cor-primaria;
     -fx-background-color: -cor-primaria-fundo;
@@ -1364,6 +1369,16 @@ Label { -fx-text-fill: -cor-texto; }
     -fx-border-width: 1;
     -fx-padding: 1 6 1 6;
 }
+
+/* O par do "G" para lembrete do MyApp: um sino no mesmo formato, em tom
+   neutro, para o Google continuar sendo o que chama a atenção. */
+.selo-agenda.selo-lembrete {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda-forte;
+    -fx-padding: 2 4 2 4;
+}
+
+.selo-lembrete .icone-forma { -fx-stroke: -cor-texto-medio; }
 
 /* "Entrar" na reunião: a ação principal da linha, preenchido como o botão
    primário, mas no tamanho miúdo. */
@@ -1708,16 +1723,53 @@ Label { -fx-text-fill: -cor-texto; }
 
 .combo-box .list-cell { -fx-text-fill: -cor-texto; -fx-background-color: transparent; }
 
+/* A lista que abre de um campo de escolha. Tem respiro por dentro e cada
+   item tem canto redondo: sem isso, o destaque do primeiro e do último item
+   (retângulo de ponta a ponta) vazava pelos cantos arredondados da lista. É
+   o mesmo desenho do menu do botão direito (.context-menu). */
 .combo-box-popup .list-view {
     -fx-background-color: -cor-superficie;
     -fx-border-color: -cor-borda-forte;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
+    -fx-padding: 5;
     -fx-effect: dropshadow(gaussian, -cor-sombra, 16, 0, 0, 5);
 }
 
-.combo-box-popup .list-cell       { -fx-padding: 8 12 8 12; -fx-text-fill: -cor-texto; }
-.combo-box-popup .list-cell:hover { -fx-background-color: -cor-primaria; -fx-text-fill: white; }
+/* Os seletores longos são de propósito: o estilo padrão do JavaFX pinta a
+   célula escolhida e a com foco com regras desse tamanho, e uma regra mais
+   curta perde para elas — o quadrado azul voltava. */
+.combo-box-popup .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused {
+    -fx-padding: 8 12 8 12;
+    -fx-text-fill: -cor-texto;
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
+}
+
+/* O já escolhido fica marcado de leve; o azul cheio é de onde o mouse está. */
+.combo-box-popup .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused:selected {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-background-insets: 0;
+    -fx-text-fill: -cor-texto;
+}
+
+.combo-box-popup .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused:hover,
+.combo-box-popup .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover,
+.combo-box-popup .list-view:focused > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:focused:selected:hover {
+    -fx-background-color: -cor-primaria;
+    -fx-background-insets: 0;
+    -fx-text-fill: white;
+}
+
+/* O ícone do item (navegadores, símbolos) acompanha o texto branco no destaque. */
+.combo-box-popup .list-cell:filled:hover .icone-forma { -fx-stroke: white; }
 
 .spinner > .increment-arrow-button,
 .spinner > .decrement-arrow-button { -fx-background-color: -cor-superficie; -fx-cursor: hand; }
@@ -1754,28 +1806,45 @@ Label { -fx-text-fill: -cor-texto; }
     -fx-background-radius: 12;
     -fx-border-radius: 12;
     -fx-effect: dropshadow(gaussian, -cor-sombra, 20, 0, 0, 6);
+    /* Respiro por dentro, como a lista dos campos de escolha: sem ele, a
+       faixa do mês e os dias dos cantos vazavam pelos cantos arredondados. */
+    -fx-padding: 6;
 }
 
-.date-picker-popup > .month-year-pane { -fx-background-color: -cor-superficie-alta; }
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 8;
+}
 .date-picker-popup > .month-year-pane .label { -fx-text-fill: -cor-texto; }
 
 .date-picker-popup > .month-year-pane .button > .left-arrow,
 .date-picker-popup > .month-year-pane .button > .right-arrow { -fx-background-color: -cor-texto-fraco; }
 
+/* A grade por trás dos dias tem fundo cinza-claro no estilo padrão do
+   JavaFX; com os dias transparentes, ele aparecia (e no tema escuro o texto
+   branco sumia sobre ele). */
+.date-picker-popup > .calendar-grid { -fx-background-color: transparent; }
+
 .date-picker-popup > * > .day-name-cell {
-    -fx-background-color: -cor-superficie-alta;
+    -fx-background-color: transparent;
     -fx-text-fill: -cor-texto-fraco;
 }
 
+/* Dias sem a grade de planilha: cada um é um botãozinho arredondado. */
 .date-picker-popup > * > .day-cell {
-    -fx-background-color: -cor-superficie;
+    -fx-background-color: transparent;
     -fx-text-fill: -cor-texto;
-    -fx-border-color: -cor-borda;
+    -fx-border-color: transparent;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-background-insets: 1;
+    -fx-border-insets: 1;
 }
 
 .date-picker-popup > * > .day-cell:hover { -fx-background-color: -cor-superficie-topo; }
-.date-picker-popup > * > .today          { -fx-border-color: -cor-primaria; -fx-border-width: 2; }
-.date-picker-popup > * > .selected       { -fx-background-color: -cor-primaria; -fx-text-fill: white; }
+.date-picker-popup > * > .today          { -fx-border-color: -cor-primaria; -fx-border-width: 1.5; }
+.date-picker-popup > * > .selected,
+.date-picker-popup > * > .selected:hover { -fx-background-color: -cor-primaria; -fx-text-fill: white; }
 
 .date-picker-popup > * > .previous-month,
 .date-picker-popup > * > .next-month { -fx-text-fill: -cor-texto-fraco; -fx-opacity: 0.45; }
@@ -1876,3 +1945,224 @@ Label { -fx-text-fill: -cor-texto; }
 }
 
 .slider .axis { -fx-tick-label-fill: -cor-texto-fraco; }
+
+/* ===================================================== interruptor (ui.Interruptor) */
+.interruptor {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.interruptor:hover { -fx-border-color: -cor-primaria; }
+.interruptor:focused { -fx-border-color: -cor-primaria-clara; }
+
+.interruptor.ligado {
+    -fx-background-color: -cor-primaria;
+    -fx-border-color: -cor-primaria;
+}
+
+.interruptor-bolinha {
+    -fx-background-color: -cor-texto-fraco;
+    -fx-background-radius: 7;
+}
+
+.interruptor.ligado .interruptor-bolinha {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 3, 0, 0, 1);
+}
+
+.interruptor.travado { -fx-cursor: default; }
+
+/* ================================== lista de opções (Configurações > Exibição) */
+.lista-opcoes {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 12;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 4;
+}
+
+.linha-opcao {
+    -fx-background-radius: 8;
+    -fx-padding: 9 12 9 12;
+    -fx-cursor: hand;
+}
+
+.linha-opcao:hover { -fx-background-color: -cor-superficie-alta; }
+
+.linha-opcao .icone-forma { -fx-stroke: -cor-texto-medio; }
+.linha-opcao .nome-opcao { -fx-text-fill: -cor-texto; -fx-font-size: 13px; }
+
+/* Desligado: o nome e o ícone recuam, para a lista mostrar de relance o que está no menu. */
+.linha-opcao.desligada .nome-opcao { -fx-text-fill: -cor-texto-fraco; }
+.linha-opcao.desligada .icone-forma { -fx-stroke: -cor-texto-fraco; }
+
+/* Sempre ativo: esmaecido inteiro e sem resposta ao mouse. */
+.linha-opcao.travada { -fx-opacity: 0.5; -fx-cursor: default; }
+.linha-opcao.travada:hover { -fx-background-color: transparent; }
+
+.linha-opcao.sub-opcao { -fx-padding: 6 12 9 22; }
+.linha-opcao.sub-opcao .nome-opcao { -fx-font-size: 12.5px; }
+
+/* O cotovelo "└" que pendura a sub-opção no item de cima. */
+.ramo-opcao {
+    -fx-border-color: transparent transparent -cor-borda-forte -cor-borda-forte;
+    -fx-border-width: 0 0 1.5 1.5;
+    -fx-border-radius: 0 0 0 6;
+}
+
+.divisor-opcao {
+    -fx-background-color: -cor-borda;
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+/* Opção indisponível agora (ex.: "proteger" com o app trancado). */
+.linha-opcao:disabled { -fx-opacity: 0.45; }
+
+/* Dentro de uma seção (que já é cartão), a lista sobe um degrau para se separar dela. */
+.secao .lista-opcoes { -fx-background-color: -cor-superficie-alta; }
+.secao .linha-opcao:hover { -fx-background-color: -cor-superficie-topo; }
+
+/* Opção solta, fora de lista (ex.: "Mostrar arquivados" no cabeçalho do Kanban). */
+.linha-opcao.solta { -fx-padding: 6 10 6 10; }
+
+/* ======================================================= barra de progresso */
+.barra-progresso { -fx-pref-height: 8; }
+.barra-progresso > .track {
+    -fx-background-color: -cor-superficie-topo;
+    -fx-background-radius: 4;
+    -fx-background-insets: 0;
+}
+.barra-progresso > .bar {
+    -fx-background-color: -cor-primaria;
+    -fx-background-radius: 4;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+}
+
+/* ============================================================ Úteis: YouTube */
+.previa-midia {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 10;
+    -fx-padding: 10;
+}
+
+.titulo-midia { -fx-text-fill: -cor-texto; -fx-font-size: 14px; -fx-font-weight: bold; }
+
+/* Faltam programas: um quadro âmbar, que pede atenção sem parecer erro. */
+.aviso-ferramentas {
+    -fx-background-color: -cor-atencao-fundo;
+    -fx-background-radius: 10;
+    -fx-border-color: -cor-atencao;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 12 14 12 14;
+}
+
+.titulo-aviso-ferramentas { -fx-text-fill: -cor-texto; -fx-font-weight: bold; -fx-graphic-text-gap: 8; }
+
+.resultado-download {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 10;
+    -fx-padding: 8 10 8 12;
+}
+
+.nome-arquivo { -fx-text-fill: -cor-texto; -fx-graphic-text-gap: 8; }
+
+/* ================================================================ Atalhos */
+.grade-atalhos { -fx-padding: 2 0 0 0; }
+
+/* Um bloco: ícone em cima, nome embaixo. Largura fixa para a grade alinhar. */
+.bloco-atalho {
+    -fx-min-width: 104;
+    -fx-pref-width: 104;
+    -fx-max-width: 104;
+    -fx-padding: 12 6 10 6;
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.bloco-atalho:hover {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-border-color: -cor-borda-forte;
+}
+
+.bloco-atalho:pressed { -fx-background-color: -cor-superficie-topo; }
+
+/* Clicou: o bloco acende por um instante, enquanto o programa sobe. */
+.bloco-atalho.abrindo {
+    -fx-background-color: -cor-primaria-fundo;
+    -fx-border-color: -cor-primaria;
+}
+
+.bloco-atalho.arrastando { -fx-opacity: 0.4; }
+.bloco-atalho.alvo-antes { -fx-border-color: transparent transparent transparent -cor-primaria; -fx-border-width: 0 0 0 3; }
+.bloco-atalho.alvo-depois { -fx-border-color: transparent -cor-primaria transparent transparent; -fx-border-width: 0 3 0 0; }
+
+.nome-atalho {
+    -fx-text-fill: -cor-texto;
+    -fx-font-size: 12px;
+}
+
+.moldura-icone-atalho {
+    -fx-min-width: 48;
+    -fx-min-height: 48;
+    -fx-max-width: 48;
+    -fx-max-height: 48;
+    -fx-background-radius: 12;
+}
+
+/* Favicon preto sumiria no tema escuro: site vai sobre uma placa clara. */
+.moldura-icone-atalho.placa-clara {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 12;
+    -fx-padding: 6;
+}
+
+/* Símbolo do MyApp num quadrado colorido (a cor vem do atalho). */
+.icone-atalho-simbolo { -fx-background-radius: 11; }
+.icone-atalho-simbolo .icone-forma { -fx-stroke: white; }
+.icone-atalho-simbolo .icone-cheio { -fx-fill: white; -fx-stroke: transparent; }
+
+.previa-icone-atalho {
+    -fx-background-color: -cor-superficie-alta;
+    -fx-background-radius: 14;
+    -fx-border-color: -cor-borda;
+    -fx-border-radius: 14;
+}
+
+/* Grupo sem atalhos: a área pontilhada convida a soltar algo ali. */
+.grupo-atalhos-vazio {
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-style: segments(6, 5);
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 22 16 22 16;
+}
+
+/* Arrastando um programa, pasta ou link de fora por cima do grupo. */
+.secao.alvo-soltar {
+    -fx-border-color: -cor-primaria;
+    -fx-border-width: 2;
+    -fx-background-color: -cor-primaria-fundo;
+}
+
+/* O navegador do site, pequeno, no canto do ícone. */
+.selo-navegador {
+    -fx-background-color: -cor-superficie;
+    -fx-background-radius: 7;
+    -fx-border-color: -cor-borda-forte;
+    -fx-border-radius: 7;
+    -fx-padding: 2;
+}
